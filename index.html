@@ -815,7 +815,8 @@ function sendShareCode(){
   if(code.length>1500){
     toast('コードが長め。「コピー」→LINEに直接貼り付けが確実だよ');
   }
-  lineShare(`🔗 たいじログ 共有コード\n下のコードを長押しコピーして、あなたのたいじログの「きろく」タブに貼り付けて「読み込む」を押してね\n\n${code}`);
+  // コードを先頭に置く(LINEで長文が後ろから切れてもコードが残るように)
+  lineShare(`${code}\n\n🔗↑たいじログの共有コードだよ。このメッセージを長押し→コピーして、あなたのたいじログ「きろく」タブに貼り付けて「読み込む」を押してね`);
 }
 function copyShareCode(){
   const code=makeShareCode();
@@ -837,13 +838,22 @@ function recalcPts(){
   D.pts=pts;
 }
 function importShareCode(){
-  // 改行・空白・全角スペースが混ざっていても読めるように掃除してから探す
-  const raw=document.getElementById('share-in').value.replace(/[\s　]+/g,'');
-  const match=raw.match(/TL1:[A-Za-z0-9+/=]+/);
-  if(!match){toast('コードが見つからないよ。「TL1:」から始まる部分を貼ってね');return;}
+  // 全角文字を半角に直し、改行・空白を掃除してからコードを探す
+  let raw=document.getElementById('share-in').value;
+  try{raw=raw.normalize('NFKC');}catch(e){}
+  raw=raw.replace(/[\s　]+/g,'');
+  let b64=null;
+  const m1=raw.match(/TL1:([A-Za-z0-9+/=]+)/);
+  if(m1){b64=m1[1];}
+  else{
+    // 「TL1:」が抜けてコード部分だけ貼られた場合も救済
+    const m2=raw.match(/[A-Za-z0-9+/=]{40,}/);
+    if(m2)b64=m2[0];
+  }
+  if(!b64){toast('コードが見つからないよ。LINEのメッセージを長押し→コピーで、全文まるごと貼り付けてみてね');return;}
   let o;
-  try{o=JSON.parse(decodeURIComponent(escape(atob(match[0].slice(4)))));}
-  catch(e){toast('コードが途中で切れてるみたい。全部コピーできてるか確認してね');return;}
+  try{o=JSON.parse(decodeURIComponent(escape(atob(b64))));}
+  catch(e){toast('コードが途中で切れてるみたい。メッセージ全文をまるごとコピーし直してみてね');return;}
   if(!o||!o.due){toast('コードの中身が違うみたい');return;}
   // 記録を合体(同じ日の記録は重複なしで足し合わせる)
   Object.keys(o.days||{}).forEach(k=>{

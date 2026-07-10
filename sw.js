@@ -1,4 +1,4 @@
-const CACHE = 'taijilog-v2';
+const CACHE = 'taijilog-v3';
 const ASSETS = [
   './',
   './index.html',
