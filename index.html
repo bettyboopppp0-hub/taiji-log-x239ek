@@ -103,6 +103,8 @@ nav button.on{color:var(--main)}
 .onegai-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:13.5px;font-weight:700}
 .onegai-row:last-child{border-bottom:none}
 .onegai-row input[type=checkbox]{width:22px;height:22px;accent-color:var(--main);flex-shrink:0}
+.onegai-row label{flex:1;display:flex;align-items:center;gap:10px;min-width:0;cursor:pointer}
+.onegai-del{background:#fdeaea;color:#c0564f;border:none;border-radius:50%;width:26px;height:26px;font-family:inherit;font-weight:900;font-size:13px;cursor:pointer;flex-shrink:0;line-height:1}
 /* logs */
 .log-row{font-size:13px;padding:8px 4px;border-bottom:1px dashed var(--line)}
 .log-row:last-child{border-bottom:none}
@@ -196,16 +198,28 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9p
 
     <div class="card">
       <h2>💌 赤ちゃんからパパへ</h2>
-      <p class="section-note">赤ちゃんの気持ちを代わりにお届け。今週の様子入り♪</p>
+      <p class="section-note">赤ちゃんの気持ちを代わりにお届け。開くたびに変わるよ♪</p>
       <div class="baby-msg" id="baby-msg"></div>
+      <div class="flexrow" style="margin-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="rerollBabyMsg()">🔄 べつのメッセージ</button>
+      </div>
       <button class="btn btn-line" style="margin-top:10px" onclick="sendBabyMsg()">💬 このメッセージをパパに送る</button>
     </div>
 
     <div class="card">
+      <h2>💝 パパへのありがとう</h2>
+      <p class="section-note">タップするとLINEで送れるよ。感謝は言葉にすると伝わる♪</p>
+      <div class="stamp-grid" id="arigato-grid"></div>
+    </div>
+
+    <div class="card">
       <h2>📮 パパへのお願いミッション</h2>
-      <p class="section-note">チェックしてLINEで送ると、パパの「宿題」になるよ</p>
+      <p class="section-note">チェックしてLINEで送ると、パパの「宿題」になるよ。いらないお願いは ✕ で消せるよ</p>
       <div id="onegai-list"></div>
-      <input type="text" id="onegai-free" placeholder="自由に追加(例：いちご食べたい…)" style="width:100%;margin-top:8px">
+      <div class="flexrow" style="margin-top:8px">
+        <input type="text" id="onegai-free" placeholder="新しいお願い(例：いちご食べたい…)" class="grow" style="min-width:0">
+        <button class="btn btn-ghost btn-sm" onclick="addOnegai()">＋追加</button>
+      </div>
       <button class="btn btn-line" style="margin-top:10px" onclick="sendOnegai()">💬 お願いミッションを送る</button>
     </div>
   </div>
@@ -276,6 +290,16 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9p
 <!-- ============ きろく ============ -->
 <section id="tab-record" class="hidden">
   <div class="card">
+    <h2>🔗 ふたりの記録をあわせる</h2>
+    <p class="section-note">胎動・体調・ミッションの記録を、もう1台のスマホに合体できるよ。<br>①こちらで「共有コードを送る」→ ②相手のスマホでコードを貼り付けて「読み込む」</p>
+    <div class="flexrow">
+      <button class="btn btn-line grow" style="width:auto" onclick="sendShareCode()">💬 共有コードをLINEで送る</button>
+      <button class="btn btn-ghost btn-sm" onclick="copyShareCode()">コピー</button>
+    </div>
+    <textarea id="share-in" rows="2" placeholder="届いた共有コード(TL1:…)をここに貼り付け" style="margin-top:10px"></textarea>
+    <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="importShareCode()">📥 読み込んで記録を合体する</button>
+  </div>
+  <div class="card">
     <h2>👣 たいどうの記録</h2>
     <div id="kick-log"></div>
   </div>
@@ -305,6 +329,12 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9p
     <h2>📱 ホーム画面に追加(アプリ化)</h2>
     <p style="font-size:13px"><b>iPhone:</b> Safariの共有ボタン→「ホーム画面に追加」<br><b>Android:</b> Chromeのメニュー→「ホーム画面に追加」</p>
     <p class="sub" style="margin-top:6px">ママ・パパそれぞれのスマホでこのページを開いて追加してね。</p>
+  </div>
+
+  <div class="card">
+    <h2>🔄 お願いミッションを初期リストに戻す</h2>
+    <p class="section-note">消したり追加したお願いを、最初の6個に戻します(記録は消えません)。</p>
+    <button class="btn btn-danger btn-sm" onclick="resetOnegai()">初期リストに戻す</button>
   </div>
 
   <div class="card">
@@ -411,6 +441,25 @@ const ONEGAI=[
  '🍓 おいしいもの送ってほしいな…',
  '📚 両親学級の動画、見ておいてね'
 ];
+/* 赤ちゃんからパパへのメッセージ(開くたびランダム) */
+const BABY_MSGS=[
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。いまね、${wd.f}の大きさになったよ(${wd.s})。${wd.b} あえるまであと${left}日、ママのことよろしくね💕`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。ぱぱがぼくのこと考えてくれてるの、おなかの中までちゃんと伝わってるよ。ありがとう💕 いまは${wd.f}(${wd.s})まで大きくなったよ!`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。はやくぱぱに会いたいな。あと${left}日、すっごくたのしみにしてるね!それまでに${wd.f}よりもっと大きくなっておくね💪`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。きょうもママのおなかの中で元気にしてるよ。${wd.b} ぱぱもおしごとがんばってね。ぼくもがんばって育つね🌱`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。ぱぱの声、だいすきだよ。またお話きかせてね📞 いま${wd.f}(${wd.s})だよ。会える日まであと${left}日だね💕`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。ママね、ぱぱのお話をするとき、とってもうれしそうなんだ。ぼく、ふたりの子でよかったな💕 いまは${wd.s}だよ!`,
+ (nm,wd,left)=>`ぱぱへ👶 ${nm}だよ。とおくでがんばってるぱぱ、いつもありがとう。ぼくとママはチームぱぱの応援団だよ📣 あと${left}日で会えるね!`
+];
+/* ママ→パパ ありがとうスタンプ */
+const ARIGATO=[
+ {e:'💝',t:'赤ちゃんのこと考えてくれてありがとう'},
+ {e:'🍀',t:'離れてても気にかけてくれて、すごく心強いよ'},
+ {e:'😊',t:'パパのおかげで今日もがんばれたよ、ありがとう'},
+ {e:'👶',t:'赤ちゃんもパパに会えるの楽しみにしてるよ'},
+ {e:'📞',t:'声きけて元気出た!ありがとう'},
+ {e:'💕',t:'パパが準備がんばってくれてうれしい'}
+];
 const NEGIRAI=[
  {e:'🍀',t:'いつもふたり分、がんばってくれてありがとう'},
  {e:'💐',t:'今日もおつかれさま。無理しないでね'},
@@ -429,7 +478,7 @@ function load(){
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(D));}
 function blank(role,due,baby){
-  return {role:role||'mama',due:due,baby:baby||'',days:{},onceDone:{},pts:0};
+  return {role:role||'mama',due:due,baby:baby||'',days:{},onceDone:{},pts:0,onegai:ONEGAI.slice()};
 }
 function todayKey(d){const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
 function day(k){k=k||todayKey();if(!D.days[k])D.days[k]={sym:[],note:'',kicks:[],done:[]};const d=D.days[k];d.sym=d.sym||[];d.kicks=d.kicks||[];d.done=d.done||[];return d;}
@@ -470,6 +519,7 @@ function showTab(t){
     document.querySelector('nav button[data-tab="'+x+'"]').classList.toggle('on',x===t);
   });
   if(t==='week')viewWeek=null;
+  if(t==='today')babyMsgIdx=Math.floor(Math.random()*BABY_MSGS.length);
   renderAll();
   window.scrollTo(0,0);
 }
@@ -507,10 +557,26 @@ function renderToday(){
     document.getElementById('kick-count').innerHTML=`きょうの胎動 <b>${dd.kicks.length}</b> 回`;
     // 赤ちゃんメッセージ
     document.getElementById('baby-msg').textContent=babyMsgText();
+    // ありがとうスタンプ
+    const ag=document.getElementById('arigato-grid');ag.innerHTML='';
+    ARIGATO.forEach(s=>{
+      const b=document.createElement('button');b.className='stamp';
+      const msg=s.t.replace('赤ちゃん',babyName());
+      b.innerHTML=`<span class="big">${s.e}</span>${esc(msg)}`;
+      b.onclick=()=>lineShare(`${s.e} ${msg}`);
+      ag.appendChild(b);
+    });
     // お願い
     const ol=document.getElementById('onegai-list');ol.innerHTML='';
-    ONEGAI.forEach((o,i)=>{
-      ol.insertAdjacentHTML('beforeend',`<label class="onegai-row"><input type="checkbox" data-onegai="${i}">${esc(o)}</label>`);
+    if(!D.onegai)D.onegai=ONEGAI.slice();
+    if(!D.onegai.length){ol.innerHTML='<p class="sub">お願いがないよ。下の「＋追加」で足してね。</p>';}
+    D.onegai.forEach((o,i)=>{
+      const row=document.createElement('div');row.className='onegai-row';
+      row.innerHTML=`<label><input type="checkbox" data-onegai="${i}"><span>${esc(o)}</span></label>`;
+      const del=document.createElement('button');del.className='onegai-del';del.textContent='✕';
+      del.onclick=()=>{D.onegai.splice(i,1);save();renderToday();toast('消したよ(設定から初期リストに戻せるよ)');};
+      row.appendChild(del);
+      ol.appendChild(row);
     });
   }else{
     // パパ用：今週のママ情報
@@ -530,16 +596,20 @@ function renderToday(){
     activeMissions().filter(m=>m.type==='daily').forEach(m=>list.appendChild(taskRow(m)));
   }
 }
+let babyMsgIdx=Math.floor(Math.random()*BABY_MSGS.length);
 function babyMsgText(){
   const p=pregInfo();const wd=wkData(p.week);const nm=babyName();
-  const w=Math.max(0,p.week);
   if(p.left<=0)return `ぱぱへ👶 ${nm}だよ。ついに予定日!もうすぐ会えるね。ママをいっぱい褒めてあげてね。がんばるからまっててね💕`;
-  return `ぱぱへ👶 ${nm}だよ。いまね、${wd.f}の大きさになったよ(${wd.s})。${wd.b} ママのおなかの中はあったかいよ。あえるまであと${p.left}日、ママのことよろしくね💕`;
+  return BABY_MSGS[babyMsgIdx%BABY_MSGS.length](nm,wd,p.left);
+}
+function rerollBabyMsg(){
+  babyMsgIdx=(babyMsgIdx+1+Math.floor(Math.random()*(BABY_MSGS.length-1)))%BABY_MSGS.length;
+  document.getElementById('baby-msg').textContent=babyMsgText();
 }
 function addKick(){
   const dd=day();
   const n=new Date();
-  dd.kicks.push(n.getHours()+':'+String(n.getMinutes()).padStart(2,'0'));
+  dd.kicks.push(n.getHours()+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0')+'.'+n.getMilliseconds());
   save();renderToday();
   toast('👣 きろくしたよ!('+dd.kicks.length+'回目)');
 }
@@ -557,10 +627,21 @@ function sendReport(){
   lineShare(t);
 }
 function sendBabyMsg(){lineShare(babyMsgText());}
+function addOnegai(){
+  const inp=document.getElementById('onegai-free');
+  const v=inp.value.trim();
+  if(!v){toast('お願いを入力してね');return;}
+  if(!D.onegai)D.onegai=ONEGAI.slice();
+  D.onegai.push('💌 '+v);
+  inp.value='';
+  save();renderToday();toast('リストに追加したよ!');
+}
+function resetOnegai(){
+  D.onegai=ONEGAI.slice();
+  save();renderAll();toast('お願いリストを初期に戻したよ!');
+}
 function sendOnegai(){
-  const checks=[...document.querySelectorAll('[data-onegai]:checked')].map(c=>ONEGAI[+c.dataset.onegai]);
-  const free=document.getElementById('onegai-free').value.trim();
-  if(free)checks.push('💌 '+free);
+  const checks=[...document.querySelectorAll('[data-onegai]:checked')].map(c=>D.onegai[+c.dataset.onegai]);
   if(!checks.length){toast('お願いをえらんでね');return;}
   lineShare(`📮 ママ&${babyName()}からのお願いミッション!\n`+checks.map(c=>'・'+c).join('\n')+`\nクリアしたら「できた!」って教えてね😆`);
 }
@@ -664,7 +745,8 @@ function renderRecord(){
   const keys=Object.keys(D.days).sort().reverse().slice(0,14);
   const fmt=k=>{const [y,m,d]=k.split('-');return `${+m}/${+d}`;};
   const kl=document.getElementById('kick-log');
-  const rowsK=keys.filter(k=>day(k).kicks.length).map(k=>`<div class="log-row"><span class="d">${fmt(k)}</span> 👣 ${day(k).kicks.length}回 <span class="sub">(${day(k).kicks.slice(-5).join(' / ')}${day(k).kicks.length>5?' …':''})</span></div>`);
+  const hm=t=>{const a=String(t).split(':');return a[0]+':'+a[1];};
+  const rowsK=keys.filter(k=>day(k).kicks.length).map(k=>`<div class="log-row"><span class="d">${fmt(k)}</span> 👣 ${day(k).kicks.length}回 <span class="sub">(${day(k).kicks.slice(-5).map(hm).join(' / ')}${day(k).kicks.length>5?' …':''})</span></div>`);
   kl.innerHTML=rowsK.length?rowsK.join(''):'<p class="sub">まだ記録がないよ。「きょう」タブでポコッと押してね。</p>';
   const sl=document.getElementById('sym-log');
   const rowsS=keys.filter(k=>day(k).sym.length||day(k).note).map(k=>`<div class="log-row"><span class="d">${fmt(k)}</span> ${esc(day(k).sym.join('、'))}${day(k).note?` <span class="sub">「${esc(day(k).note)}」</span>`:''}</div>`);
@@ -703,6 +785,58 @@ function restoreData(input){
   const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result);if(d&&d.due){D=d;save();renderAll();toast('読み込んだよ!');}else toast('ファイルが違うみたい');}catch(e){toast('読み込めなかった…');}};
   r.readAsText(f);
+}
+
+/* ===== 記録の共有(ママ⇄パパ) ===== */
+function makeShareCode(){
+  const payload={due:D.due,baby:D.baby,days:D.days,onceDone:D.onceDone||{}};
+  return 'TL1:'+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+function sendShareCode(){
+  lineShare(`🔗 たいじログ 共有コード\n下のコードを長押しコピーして、あなたのたいじログの「きろく」タブに貼り付けて「読み込む」を押してね\n\n${makeShareCode()}`);
+}
+function copyShareCode(){
+  const code=makeShareCode();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(()=>toast('共有コードをコピーしたよ!')).catch(()=>fallbackCopy(code));
+  }else fallbackCopy(code);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('共有コードをコピーしたよ!');}catch(e){toast('コピーできなかった…LINEで送ってね');}
+  ta.remove();
+}
+function recalcPts(){
+  let pts=0;
+  Object.keys(D.days).forEach(k=>{
+    (D.days[k].done||[]).forEach(id=>{const m=MISSIONS.find(x=>x.id===id);if(m)pts+=m.pt;});
+  });
+  Object.keys(D.onceDone||{}).forEach(id=>{const m=MISSIONS.find(x=>x.id===id);if(m)pts+=m.pt;});
+  D.pts=pts;
+}
+function importShareCode(){
+  const raw=document.getElementById('share-in').value;
+  const match=raw.match(/TL1:[A-Za-z0-9+/=]+/);
+  if(!match){toast('コードが見つからないよ(TL1:…を貼ってね)');return;}
+  let o;
+  try{o=JSON.parse(decodeURIComponent(escape(atob(match[0].slice(4)))));}catch(e){toast('コードが読み取れなかった…');return;}
+  if(!o||!o.due){toast('コードの中身が違うみたい');return;}
+  // 記録を合体(同じ日の記録は重複なしで足し合わせる)
+  Object.keys(o.days||{}).forEach(k=>{
+    const a=day(k),b=o.days[k]||{};
+    (b.sym||[]).forEach(s=>{if(!a.sym.includes(s))a.sym.push(s);});
+    (b.kicks||[]).forEach(t=>{if(!a.kicks.includes(t))a.kicks.push(t);});
+    (b.done||[]).forEach(id=>{if(!a.done.includes(id))a.done.push(id);});
+    if(!a.note&&b.note)a.note=b.note;
+  });
+  D.onceDone=D.onceDone||{};
+  Object.keys(o.onceDone||{}).forEach(id=>{if(!D.onceDone[id])D.onceDone[id]=o.onceDone[id];});
+  if(!D.baby&&o.baby)D.baby=o.baby;
+  recalcPts();
+  save();
+  document.getElementById('share-in').value='';
+  renderAll();
+  toast('ふたりの記録を合体したよ!');
 }
 
 /* ===== common ===== */
