@@ -291,7 +291,7 @@ textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9p
 <section id="tab-record" class="hidden">
   <div class="card">
     <h2>🔗 ふたりの記録をあわせる</h2>
-    <p class="section-note">胎動・体調・ミッションの記録を、もう1台のスマホに合体できるよ。<br>①こちらで「共有コードを送る」→ ②相手のスマホでコードを貼り付けて「読み込む」</p>
+    <p class="section-note">胎動・体調・ミッションの記録を、もう1台のスマホに合体できるよ。<br>①こちらで「共有コードを送る」→ ②相手のスマホでコードを貼り付けて「読み込む」<br>💡うまく読めないときは「コピー」ボタン→LINEに自分で貼り付けが確実。読み込むときはコードを最初から最後まで全部コピーしてね(前後に文章が混ざってもOK)</p>
     <div class="flexrow">
       <button class="btn btn-line grow" style="width:auto" onclick="sendShareCode()">💬 共有コードをLINEで送る</button>
       <button class="btn btn-ghost btn-sm" onclick="copyShareCode()">コピー</button>
@@ -684,16 +684,23 @@ function missionDoneToday(m){
   if(m.type==='once')return !!D.onceDone[m.id];
   return day().done.includes(m.id);
 }
-function taskRow(m){
+function taskRow(m,readonly){
   const div=document.createElement('div');div.className='task'+(missionDoneToday(m)?' is-done':'');
   const tag=m.type==='daily'?'<span class="period-tag pt-daily">毎日</span>':'<span class="period-tag pt-once">1回クリア</span>';
   div.innerHTML=`<span class="emoji">${m.e}</span>
     <div class="body"><div class="name">${esc(m.n)}${tag}</div><div class="tip">${esc(m.tip)}</div></div>
     <span class="pt">${m.pt}pt</span>`;
-  const btn=document.createElement('button');btn.className='done-btn';
-  btn.textContent=missionDoneToday(m)?'クリア済':'できた!';
-  btn.onclick=()=>doMission(m);
-  div.appendChild(btn);
+  if(readonly){
+    const st=document.createElement('span');
+    st.style.cssText='font-weight:900;font-size:12px;white-space:nowrap;'+(missionDoneToday(m)?'color:#3da06c':'color:#c8b4bc');
+    st.textContent=missionDoneToday(m)?'✅クリア':'まだ';
+    div.appendChild(st);
+  }else{
+    const btn=document.createElement('button');btn.className='done-btn';
+    btn.textContent=missionDoneToday(m)?'クリア済':'できた!';
+    btn.onclick=()=>doMission(m);
+    div.appendChild(btn);
+  }
   return div;
 }
 function doMission(m){
@@ -718,6 +725,7 @@ function levelOf(pt){
   return {lv,next};
 }
 function renderMission(){
+  const isMama=D.role==='mama';
   const pt=D.pts||0;
   const {lv,next}=levelOf(pt);
   document.getElementById('level-total').textContent=`・ 累計${pt}pt`;
@@ -725,10 +733,14 @@ function renderMission(){
   const fill=next?Math.min(100,Math.round((pt-lv.pt)/(next.pt-lv.pt)*100)):100;
   document.getElementById('level-bar-fill').style.width=fill+'%';
   document.getElementById('level-pts').textContent=next?`あと${next.pt-pt}ptで「${next.emoji} ${next.name}」!`:'最高ランク!もう立派なパパ!';
+  document.getElementById('mission-note').innerHTML=isMama
+    ?'これは<b>パパの父親準備ミッション</b>。ママはのぞき見モードだよ👀 パパのスマホの共有コードを「きろく」タブで合体すると、パパの進み具合とランクがここに反映されるよ。'
+    :'出産予定日に合わせて、今やるべき「父親準備」が出てくるよ。<span class="period-tag pt-daily">毎日</span>は1日1回、<span class="period-tag pt-once">1回クリア</span>はできたらずっとクリア!';
+  document.getElementById('report-card').classList.toggle('hidden',isMama);
   const list=document.getElementById('mission-list');list.innerHTML='';
   const ms=activeMissions();
   if(!ms.length){list.innerHTML='<p class="sub">いまの週数のミッションはないよ</p>';}
-  ms.forEach(m=>list.appendChild(taskRow(m)));
+  ms.forEach(m=>list.appendChild(taskRow(m,isMama)));
 }
 function sendMissionReport(){
   const dd=day();
@@ -789,11 +801,21 @@ function restoreData(input){
 
 /* ===== 記録の共有(ママ⇄パパ) ===== */
 function makeShareCode(){
-  const payload={due:D.due,baby:D.baby,days:D.days,onceDone:D.onceDone||{}};
+  // 空の日は入れない(コードを短くしてLINEで切れにくくする)
+  const days={};
+  Object.keys(D.days).forEach(k=>{
+    const d=D.days[k];
+    if((d.sym&&d.sym.length)||(d.kicks&&d.kicks.length)||(d.done&&d.done.length)||d.note)days[k]=d;
+  });
+  const payload={due:D.due,baby:D.baby,days:days,onceDone:D.onceDone||{}};
   return 'TL1:'+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 function sendShareCode(){
-  lineShare(`🔗 たいじログ 共有コード\n下のコードを長押しコピーして、あなたのたいじログの「きろく」タブに貼り付けて「読み込む」を押してね\n\n${makeShareCode()}`);
+  const code=makeShareCode();
+  if(code.length>1500){
+    toast('コードが長め。「コピー」→LINEに直接貼り付けが確実だよ');
+  }
+  lineShare(`🔗 たいじログ 共有コード\n下のコードを長押しコピーして、あなたのたいじログの「きろく」タブに貼り付けて「読み込む」を押してね\n\n${code}`);
 }
 function copyShareCode(){
   const code=makeShareCode();
@@ -815,11 +837,13 @@ function recalcPts(){
   D.pts=pts;
 }
 function importShareCode(){
-  const raw=document.getElementById('share-in').value;
+  // 改行・空白・全角スペースが混ざっていても読めるように掃除してから探す
+  const raw=document.getElementById('share-in').value.replace(/[\s　]+/g,'');
   const match=raw.match(/TL1:[A-Za-z0-9+/=]+/);
-  if(!match){toast('コードが見つからないよ(TL1:…を貼ってね)');return;}
+  if(!match){toast('コードが見つからないよ。「TL1:」から始まる部分を貼ってね');return;}
   let o;
-  try{o=JSON.parse(decodeURIComponent(escape(atob(match[0].slice(4)))));}catch(e){toast('コードが読み取れなかった…');return;}
+  try{o=JSON.parse(decodeURIComponent(escape(atob(match[0].slice(4)))));}
+  catch(e){toast('コードが途中で切れてるみたい。全部コピーできてるか確認してね');return;}
   if(!o||!o.due){toast('コードの中身が違うみたい');return;}
   // 記録を合体(同じ日の記録は重複なしで足し合わせる)
   Object.keys(o.days||{}).forEach(k=>{
