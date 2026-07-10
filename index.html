@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>たいじログ</title>
+<meta name="description" content="離れてても、パパもいっしょに。単身赴任・里帰り中の夫婦のためのマタニティ共有アプリ。胎動・体調・週数ガイド・パパの父親準備ミッション。">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#d96a86">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --main:#d96a86; --main-l:#fcecf0; --navy:#5a4550;
+  --papa:#4a7fb5; --papa-l:#e8f1fa;
+  --gold:#e8b93c; --bg:#fbf7f8; --card:#ffffff;
+  --text:#4a3e43; --sub:#95848b; --line:#f0e2e6;
+  --radius:18px; --shadow:0 2px 10px rgba(90,69,80,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Zen Maru Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+header{background:linear-gradient(135deg,#c65878,#e89aae);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:17px;font-weight:900;letter-spacing:.05em}
+.role-badge{background:rgba(255,255,255,.25);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700}
+main{max-width:520px;margin:0 auto;padding:16px 14px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sub{color:var(--sub);font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;font-family:inherit;font-weight:700;font-size:14px;padding:11px 18px;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--main);color:#fff}
+.btn-line{background:#06c755;color:#fff;width:100%;font-size:15px;padding:13px}
+.btn-ghost{background:var(--main-l);color:var(--main)}
+.btn-sm{padding:7px 13px;font-size:12px}
+.btn-danger{background:#fdeaea;color:#c0564f}
+/* nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:60;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:none;font-family:inherit;padding:9px 0 7px;font-size:10px;color:var(--sub);font-weight:700;cursor:pointer}
+nav button .ico{display:block;font-size:20px;margin-bottom:1px}
+nav button.on{color:var(--main)}
+/* countdown */
+.count-card{background:linear-gradient(135deg,#c65878,#e89aae);color:#fff;border-radius:var(--radius);padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;text-align:center}
+.count-card::after{content:'👶';position:absolute;right:2px;bottom:-12px;font-size:74px;opacity:.15}
+.count-card .wk{font-size:14px;font-weight:700;opacity:.95}
+.count-card .days{font-size:15px;margin-top:6px}
+.count-card .days b{font-size:38px;font-weight:900;margin:0 3px}
+.count-card .tri{display:inline-block;background:rgba(255,255,255,.25);border-radius:999px;font-size:11px;font-weight:900;padding:2px 12px;margin-top:8px}
+/* week view */
+.wk-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.wk-nav button{background:var(--main-l);border:none;color:var(--main);font-family:inherit;font-weight:900;font-size:14px;border-radius:999px;padding:7px 16px;cursor:pointer}
+.wk-nav .wk-label{font-weight:900;color:var(--navy);font-size:16px}
+.baby-hero{text-align:center;padding:6px 0 10px}
+.baby-hero .fruit{font-size:62px;line-height:1.2}
+.baby-hero .fname{font-weight:900;color:var(--main);font-size:16px;margin-top:2px}
+.baby-hero .fsize{font-size:12.5px;color:var(--sub)}
+.info-block{border-radius:14px;padding:12px 14px;font-size:13.5px;margin-top:10px}
+.info-block .bt{font-weight:900;font-size:13px;display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.ib-baby{background:#fdf3f6}.ib-baby .bt{color:var(--main)}
+.ib-mama{background:#fdf6ea}.ib-mama .bt{color:#b5822a}
+.ib-tsurai{background:#f7f0fa}.ib-tsurai .bt{color:#8a5aa8}
+.ib-papa{background:var(--papa-l)}.ib-papa .bt{color:var(--papa)}
+/* symptoms */
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 13px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
+.chip.on{background:var(--main);border-color:var(--main);color:#fff}
+/* kicks */
+.kick-btn{width:100%;background:linear-gradient(135deg,#e89aae,#d96a86);color:#fff;border:none;border-radius:20px;font-family:inherit;font-weight:900;font-size:19px;padding:20px;cursor:pointer;box-shadow:0 4px 14px rgba(217,106,134,.35);transition:transform .1s}
+.kick-btn:active{transform:scale(.95)}
+.kick-count{text-align:center;font-size:13px;color:var(--sub);margin-top:8px}
+.kick-count b{color:var(--main);font-size:20px}
+/* baby message */
+.baby-msg{background:linear-gradient(135deg,#fdf3f6,#fcecf0);border-radius:14px;padding:14px;font-size:13.5px;position:relative}
+.baby-msg::before{content:'👶';position:absolute;top:-12px;left:12px;font-size:24px}
+/* level */
+.level-card{background:linear-gradient(135deg,#2e5583,#4a7fb5);color:#fff;border-radius:var(--radius);padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+.level-card::after{content:'💪';position:absolute;right:6px;bottom:-8px;font-size:64px;opacity:.16}
+.level-title{font-size:12px;opacity:.85}
+.level-name{font-size:21px;font-weight:900;margin:2px 0 8px}
+.level-bar{background:rgba(255,255,255,.25);border-radius:999px;height:10px;overflow:hidden}
+.level-bar>div{background:var(--gold);height:100%;border-radius:999px;transition:width .5s}
+.level-pts{font-size:12px;margin-top:6px;opacity:.9}
+/* missions */
+.task{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px dashed var(--line)}
+.task:last-child{border-bottom:none}
+.task .emoji{font-size:26px;width:36px;text-align:center;flex-shrink:0}
+.task .body{flex:1;min-width:0}
+.task .name{font-weight:700;font-size:14px}
+.task .tip{font-size:11.5px;color:var(--sub)}
+.task .pt{background:var(--gold);color:#fff;border-radius:999px;font-size:11px;font-weight:900;padding:2px 9px;white-space:nowrap}
+.task .done-btn{background:var(--papa);color:#fff;border:none;border-radius:999px;font-family:inherit;font-weight:900;font-size:12px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.task.is-done .done-btn{background:#c9d4de}
+.period-tag{display:inline-block;border-radius:999px;font-size:10px;font-weight:900;padding:1px 8px;color:#fff;margin-left:5px;vertical-align:2px}
+.pt-daily{background:var(--main)}.pt-once{background:var(--papa)}
+/* stamps */
+.stamp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stamp{background:var(--main-l);border:none;border-radius:12px;padding:12px 8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--main);cursor:pointer;text-align:center}
+.stamp .big{display:block;font-size:24px;margin-bottom:2px}
+/* onegai */
+.onegai-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px dashed var(--line);font-size:13.5px;font-weight:700}
+.onegai-row:last-child{border-bottom:none}
+.onegai-row input[type=checkbox]{width:22px;height:22px;accent-color:var(--main);flex-shrink:0}
+/* logs */
+.log-row{font-size:13px;padding:8px 4px;border-bottom:1px dashed var(--line)}
+.log-row:last-child{border-bottom:none}
+.log-row .d{font-weight:900;color:var(--navy);font-size:12px}
+/* inputs */
+.memo-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.memo-row label{width:82px;font-size:13px;font-weight:700;flex-shrink:0}
+.memo-row input,.memo-row select{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:inherit;font-size:16px;background:#fff}
+input[type=text],input[type=date]{border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:inherit;font-size:16px;background:#fff}
+input::placeholder{font-size:13px;color:#cbb4bc}
+/* setup */
+#setup{position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;padding:40px 20px}
+#setup .inner{max-width:420px;margin:0 auto}
+#setup h1{color:var(--main);font-size:24px;font-weight:900;text-align:center;margin-bottom:6px}
+.role-pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.role-pick button{border:2.5px solid var(--line);background:#fff;border-radius:18px;padding:22px 10px;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;color:var(--text)}
+.role-pick button .big{display:block;font-size:40px;margin-bottom:6px}
+.role-pick button.sel{border-color:var(--main);background:var(--main-l)}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin-bottom:4px}
+.form-row input{width:100%}
+/* toast + celebrate */
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;z-index:120;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+#celebrate{position:fixed;inset:0;z-index:110;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#celebrate .box{background:#fff;border-radius:22px;padding:26px 34px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2);animation:pop .4s}
+#celebrate .box .big{font-size:52px}
+#celebrate .box .msg{font-weight:900;color:var(--main);font-size:17px;margin-top:4px}
+#celebrate .box .pt{color:var(--gold);font-weight:900;font-size:14px}
+.section-note{font-size:12px;color:var(--sub);margin-bottom:8px}
+.flexrow{display:flex;gap:8px;align-items:center}
+.grow{flex:1}
+textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;font-family:inherit;font-size:16px;resize:vertical;background:#fff}
+</style>
+</head>
+<body>
+
+<!-- 初回セットアップ -->
+<div id="setup" class="hidden">
+  <div class="inner">
+    <h1>🤰 たいじログ</h1>
+    <p class="sub" style="text-align:center">離れてても、パパもいっしょに。<br>おなかの赤ちゃんと、遠くのパパをつなぐアプリ</p>
+    <div class="card" style="margin-top:20px">
+      <h2>あなたはどっち?</h2>
+      <div class="role-pick">
+        <button id="pick-mama" onclick="pickRole('mama')"><span class="big">🤰</span>ママ</button>
+        <button id="pick-papa" onclick="pickRole('papa')"><span class="big">👨</span>パパ</button>
+      </div>
+      <div class="form-row"><label>出産予定日(必須)</label><input type="date" id="setup-due"></div>
+      <div class="form-row"><label>赤ちゃんの呼び名(任意)</label><input type="text" id="setup-baby" placeholder="例：ぽこちゃん"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="finishSetup()">はじめる!</button>
+      <p class="sub" style="margin-top:12px">💡 ママのスマホ・パパのスマホ、それぞれでこのアプリを開いて設定してね。記録やメッセージはLINEで送り合えるよ。</p>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>🤰 たいじログ</h1>
+  <span class="role-badge" id="role-badge"></span>
+</header>
+
+<main>
+
+<!-- ============ きょう ============ -->
+<section id="tab-today">
+  <div class="count-card">
+    <div class="wk" id="cc-week"></div>
+    <div class="days" id="cc-days"></div>
+    <span class="tri" id="cc-tri"></span>
+  </div>
+
+  <!-- ママ用 -->
+  <div id="today-mama">
+    <div class="card">
+      <h2>👣 たいどうカウンター</h2>
+      <button class="kick-btn" onclick="addKick()">ポコッ! いま動いた👣</button>
+      <div class="kick-count" id="kick-count"></div>
+      <button class="btn btn-line" style="margin-top:10px" onclick="sendKick()">💬 パパに「動いたよ!」速報を送る</button>
+    </div>
+
+    <div class="card">
+      <h2>🩺 きょうの体調</h2>
+      <p class="section-note">当てはまるものをタップしてね(いくつでもOK)</p>
+      <div class="chip-grid" id="sym-grid"></div>
+      <div style="margin-top:12px">
+        <input type="text" id="today-note" placeholder="ひとこと(例：今日はよく動く日!)" style="width:100%">
+      </div>
+      <button class="btn btn-line" style="margin-top:10px" onclick="sendReport()">💬 きょうのレポートをパパに送る</button>
+    </div>
+
+    <div class="card">
+      <h2>💌 赤ちゃんからパパへ</h2>
+      <p class="section-note">赤ちゃんの気持ちを代わりにお届け。今週の様子入り♪</p>
+      <div class="baby-msg" id="baby-msg"></div>
+      <button class="btn btn-line" style="margin-top:10px" onclick="sendBabyMsg()">💬 このメッセージをパパに送る</button>
+    </div>
+
+    <div class="card">
+      <h2>📮 パパへのお願いミッション</h2>
+      <p class="section-note">チェックしてLINEで送ると、パパの「宿題」になるよ</p>
+      <div id="onegai-list"></div>
+      <input type="text" id="onegai-free" placeholder="自由に追加(例：いちご食べたい…)" style="width:100%;margin-top:8px">
+      <button class="btn btn-line" style="margin-top:10px" onclick="sendOnegai()">💬 お願いミッションを送る</button>
+    </div>
+  </div>
+
+  <!-- パパ用 -->
+  <div id="today-papa" class="hidden">
+    <div class="card">
+      <h2>💙 いまのママは…</h2>
+      <div id="papa-mama-info"></div>
+    </div>
+    <div class="card">
+      <h2>💐 ママをねぎらう</h2>
+      <p class="section-note">タップするとLINEで送れるよ。毎日のひと言が一番の薬</p>
+      <div class="stamp-grid" id="negirai-grid"></div>
+    </div>
+    <div class="card">
+      <h2>🎯 きょうのパパミッション</h2>
+      <p class="section-note">くわしくは「ミッション」タブへ</p>
+      <div id="papa-today-missions"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 今週 ============ -->
+<section id="tab-week" class="hidden">
+  <div class="card">
+    <div class="wk-nav">
+      <button onclick="moveWeek(-1)">◀ 前の週</button>
+      <span class="wk-label" id="wk-label"></span>
+      <button onclick="moveWeek(1)">次の週 ▶</button>
+    </div>
+    <div class="baby-hero">
+      <div class="fruit" id="wk-fruit"></div>
+      <div class="fname" id="wk-fname"></div>
+      <div class="fsize" id="wk-fsize"></div>
+    </div>
+    <div class="info-block ib-baby"><div class="bt">👶 赤ちゃんのようす</div><span id="wk-baby"></span></div>
+    <div class="info-block ib-mama"><div class="bt">🤰 ママのからだの変化</div><span id="wk-mama"></span></div>
+    <div class="info-block ib-tsurai"><div class="bt">😢 この時期つらいことが多いのは…</div><span id="wk-tsurai"></span></div>
+    <div class="info-block ib-papa"><div class="bt">💙 パパにできること</div><span id="wk-papa"></span></div>
+    <button class="btn btn-line" style="margin-top:14px" onclick="sendWeek()">💬 今週のようすをLINEで送る</button>
+    <p class="sub" style="margin-top:10px">※大きさや症状はあくまで目安です。個人差があります。心配なことは必ずかかりつけ医に相談してください。</p>
+  </div>
+</section>
+
+<!-- ============ ミッション ============ -->
+<section id="tab-mission" class="hidden">
+  <div class="level-card">
+    <div class="level-title">パパ準備度 <span id="level-total"></span></div>
+    <div class="level-name" id="level-name"></div>
+    <div class="level-bar"><div id="level-bar-fill" style="width:0%"></div></div>
+    <div class="level-pts" id="level-pts"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎯 いまの時期のミッション</h2>
+    <p class="section-note" id="mission-note">出産予定日に合わせて、今やるべき「父親準備」が出てくるよ。<span class="period-tag pt-daily">毎日</span>は1日1回、<span class="period-tag pt-once">1回クリア</span>はできたらずっとクリア!</p>
+    <div id="mission-list"></div>
+  </div>
+
+  <div class="card" id="report-card">
+    <h2>💪 パパのがんばり報告</h2>
+    <p class="section-note">きょうクリアしたミッションをママにLINEで報告しよう</p>
+    <button class="btn btn-line" onclick="sendMissionReport()">💬 きょうの報告をLINEで送る</button>
+  </div>
+</section>
+
+<!-- ============ きろく ============ -->
+<section id="tab-record" class="hidden">
+  <div class="card">
+    <h2>👣 たいどうの記録</h2>
+    <div id="kick-log"></div>
+  </div>
+  <div class="card">
+    <h2>🩺 体調の記録</h2>
+    <div id="sym-log"></div>
+  </div>
+  <div class="card">
+    <h2>🎯 ミッション達成の記録</h2>
+    <div id="mission-log"></div>
+  </div>
+</section>
+
+<!-- ============ 設定 ============ -->
+<section id="tab-settings" class="hidden">
+  <div class="card">
+    <h2>👤 あなたの設定</h2>
+    <div class="memo-row"><label>役割</label>
+      <select id="set-role"><option value="mama">🤰 ママ</option><option value="papa">👨 パパ</option></select>
+    </div>
+    <div class="memo-row"><label>出産予定日</label><input type="date" id="set-due"></div>
+    <div class="memo-row"><label>赤ちゃん</label><input type="text" id="set-baby" placeholder="呼び名"></div>
+    <button class="btn btn-primary btn-sm" onclick="saveSettings()">保存する</button>
+  </div>
+
+  <div class="card">
+    <h2>📱 ホーム画面に追加(アプリ化)</h2>
+    <p style="font-size:13px"><b>iPhone:</b> Safariの共有ボタン→「ホーム画面に追加」<br><b>Android:</b> Chromeのメニュー→「ホーム画面に追加」</p>
+    <p class="sub" style="margin-top:6px">ママ・パパそれぞれのスマホでこのページを開いて追加してね。</p>
+  </div>
+
+  <div class="card">
+    <h2>💾 データのバックアップ</h2>
+    <div class="flexrow">
+      <button class="btn btn-ghost btn-sm grow" onclick="backupData()">書き出す</button>
+      <button class="btn btn-ghost btn-sm grow" onclick="document.getElementById('restore-file').click()">読み込む</button>
+      <input type="file" id="restore-file" accept=".json" class="hidden" onchange="restoreData(this)">
+    </div>
+  </div>
+
+  <p class="sub" style="text-align:center;margin:20px 0">データはこのスマホの中だけに保存されます。<br>外部に送信されることはありません。<br>体調に関する内容は一般的な目安です。診断や治療の代わりにはなりません。</p>
+</section>
+
+</main>
+
+<nav>
+  <button data-tab="today" class="on" onclick="showTab('today')"><span class="ico">🏠</span>きょう</button>
+  <button data-tab="week" onclick="showTab('week')"><span class="ico">👶</span>今週</button>
+  <button data-tab="mission" onclick="showTab('mission')"><span class="ico">🎯</span>ミッション</button>
+  <button data-tab="record" onclick="showTab('record')"><span class="ico">📊</span>きろく</button>
+  <button data-tab="settings" onclick="showTab('settings')"><span class="ico">⚙️</span>設定</button>
+</nav>
+
+<div id="toast"></div>
+<div id="celebrate" class="hidden"></div>
+
+<script>
+const KEY='taijilog-data';
+
+/* ===== 週数データ(4〜41週) : f=たとえ s=大きさ b=赤ちゃん m=ママの変化 t=つらいこと p=パパにできること ===== */
+const WEEKS={
+ 4:{e:'🌱',f:'けしつぶくらい',s:'約2mm',b:'心臓や脳のもとができ始めたよ。命のスタート!',m:'生理の遅れで妊娠に気づくころ。ホルモンが急激に変化して、体の中は大工事中。',t:'とにかくだるい・眠い・気分の浮き沈み。見た目は変わらないのに体は別人級の変化。',p:'「なにもしてないのに疲れる」が本当に起きてる時期。「疲れてない?」の一言を毎日送ろう。'},
+ 5:{e:'🍚',f:'お米つぶくらい',s:'約4mm',b:'ちいさな心臓がトクトク動き始めるころ。',m:'つわりが始まる人も。基礎体温が高い状態が続いて、ほてりやすい。',t:'吐き気・においに敏感・強い眠気。ごはんの炊けるにおいでダウンする人も。',p:'電話やLINEで食べ物の話題は控えめに。「食べられるものある?」の聞き方が優しい。'},
+ 6:{e:'🫘',f:'あずきくらい',s:'約8mm',b:'病院のエコーで心拍が確認できるころ。',m:'つわりが本格化。胸の張りや頻尿も始まる。',t:'空腹でも満腹でも気持ち悪い「食べづわり」「吐きづわり」。仕事や家事が本当にしんどい。',p:'「食べられる物を、食べられる時に、食べられるだけ」でOKと伝えてあげて。栄養バランスは今は二の次でいいんだよ。'},
+ 7:{e:'🫐',f:'ブルーベリーくらい',s:'約1.5cm',b:'手足のもとと、目や鼻のパーツができ始めたよ。',m:'ホルモンの影響で便秘や肌荒れが出やすい。',t:'つわりがピークに向かう。「いつまで続くの…」と先が見えない不安。',p:'ネットスーパーや宅配弁当を一緒に探して手配してあげよう。「家事を減らす仕組み」が最高のプレゼント。'},
+ 8:{e:'🍇',f:'ぶどう1粒くらい',s:'約2cm',b:'手足の指ができて、ちょっとずつ動き始めたよ。',m:'子宮が大きくなり始めて、トイレが近くなる。',t:'吐きづわり・よだれづわり・眠りづわり…つわりのオンパレード。',p:'「がんばれ」より「がんばってるね」。応援より共感が効く時期。'},
+ 9:{e:'🍒',f:'さくらんぼくらい',s:'約3cm',b:'しっぽが消えて、ぐっと赤ちゃんらしい姿に。',m:'ホルモンの影響で頭痛やめまいが出る人も。',t:'つわりのピーク。食べられなくて体重が減る人もいるほど。',p:'「水分は取れてる?」だけ気にかけて。水も飲めないほどつらそうなら受診をすすめてあげて。'},
+ 10:{e:'🍓',f:'いちごくらい',s:'約4cm',b:'体の器官のもとがほぼ完成!ここからは育つターン。',m:'子宮がグレープフルーツくらいの大きさに。',t:'まだつわりが続く。「私だけこんなにつらいの?」と気分も落ちやすい。',p:'「12週ごろには楽になる人が多いって」と希望を一緒に持とう。ゴールが見えると人はがんばれる。'},
+ 11:{e:'🥝',f:'キウイくらい',s:'約5cm',b:'顔立ちがはっきりしてきて、しゃっくりする子も。',m:'つわりが少しずつ軽くなり始める人も。',t:'楽になったと思ったらまた気持ち悪い…の波。油断すると裏切られる時期。',p:'まだ安定期じゃないから、旅行や遠出の話は慎重に。「無理しないでね」を合言葉に。'},
+ 12:{e:'🍋',f:'レモンくらい',s:'約6cm・約15g',b:'内臓がほぼ完成して、羊水の中でくるくる回ってるよ。',m:'胎盤が完成に近づいて、流産のリスクがぐっと下がってくる。',t:'つわりが落ち着き始めるけど個人差大。まだつらい人もたくさんいる。',p:'「もう平気でしょ?」は禁句。つわりの終わりは人それぞれと知っておくのが優しさ。'},
+ 13:{e:'🍊',f:'みかんくらい',s:'約7.5cm',b:'指しゃぶりを始める子も。かわいすぎる…!',m:'食欲が少しずつ戻ってくる。',t:'立ちくらみや便秘。急に食欲が出て体重管理の悩みも始まる。',p:'「いま何なら食べたい?」と聞いて、好物やフルーツを送ってあげよう。差し入れ便は最強。'},
+ 14:{e:'🥑',f:'アボカドくらい',s:'約8.5cm',b:'産毛が生えて、表情も動くようになってきたよ。',m:'胎盤が完成。いよいよ安定期の入り口。',t:'頭痛や鼻づまり(妊娠性鼻炎)が出る人も。',p:'里帰りの時期や出産する病院のこと、これからの段取りを話し合うのにいい時期だよ。'},
+ 15:{e:'🍐',f:'洋なしくらい',s:'約10cm・約80g',b:'骨がしっかりしてきて、手足をバタバタ動かしてるよ。',m:'おなかが少しふっくらしてくる。',t:'腰の重だるさ・便秘。見た目の変化に戸惑う気持ちも。',p:'「おなかの写真送って」とパパから聞いてみて。変化を一緒に喜んでくれるのが一番うれしい。'},
+ 16:{e:'🍎',f:'りんごくらい',s:'約12cm・約100g',b:'性別がわかり始める子も!安定期に入ったよ。',m:'安定期スタート。心も体も少し落ち着いてくる。',t:'貧血が出やすくなる。立ちくらみに注意。',p:'健診の結果は毎回共有してもらおう。エコー写真はパパの宝物。「性別どっちかな?」の話題で盛り上がろう。'},
+ 17:{e:'🍠',f:'さつまいもくらい',s:'約13cm',b:'皮下脂肪がつき始めて、ふっくらしてきたよ。',m:'早い人は胎動をポコポコ感じ始める!',t:'立ちくらみ・動悸。おなかが目立ち始めて服が合わなくなる。',p:'「動いた?」と聞きすぎるとプレッシャーに。報告を楽しみに待つスタンスでいよう。'},
+ 18:{e:'🫑',f:'パプリカくらい',s:'約14cm・約200g',b:'耳が聞こえ始めたよ!パパの声、届いてるよ。',m:'胎動をはっきり感じる人が増えてくる。',t:'腰痛が始まる。仰向けで寝るのが苦しくなってくる。',p:'ビデオ通話でおなかに話しかけてみよう。生まれたあと、パパの声に反応してくれるかも。'},
+ 19:{e:'🍅',f:'大きめトマトくらい',s:'約15cm',b:'五感がぐんぐん発達中。音や光を感じてるよ。',m:'子宮がおへその下あたりまで大きくなる。',t:'足がつる(こむら返り)・むくみが出始める。',p:'「水分とミネラル、とれてる?」と気にかけて。着圧ソックスのプレゼントも喜ばれるよ。'},
+ 20:{e:'🍌',f:'バナナくらい',s:'約25cm・約300g',b:'妊娠の折り返し地点!髪の毛が生え始めたよ。',m:'おなかがしっかり目立ってくる。',t:'腰痛・恥骨のあたりの痛み。体の重心が変わってくる。',p:'折り返し記念日!お祝いのビデオ通話をしよう。「半分まできたね、ありがとう」の一言を。'},
+ 21:{e:'🥕',f:'にんじんくらい',s:'約26cm',b:'まばたきの練習を始めたよ。まぶたパチパチ。',m:'胎動がどんどん力強くなる。',t:'眠りが浅くなる。夜中に目が覚めることが増える。',p:'ママから「いま動いたよ!」速報が来たら、すぐ返事を。リアルタイムで一緒に感動できるのは今だけ。'},
+ 22:{e:'🌽',f:'とうもろこしくらい',s:'約28cm・約450g',b:'眉毛とまつ毛が生えそろってきたよ。',m:'おなかが重くなってきて、動きがゆっくりに。',t:'背中の痛み・ちょっと動くと息切れ。',p:'帰省したら重い荷物・買い出し・高いところの物は全部パパの担当ね!'},
+ 23:{e:'🍆',f:'大きめなすくらい',s:'約29cm',b:'外の音に反応してキックするようになったよ!',m:'体重が増えやすい時期に入る。',t:'むくみ・こむら返り。体重指導が始まってプレッシャーも。',p:'体重の話はとてもデリケート。自分からは絶対に触れない。触れるなら「よくがんばってるね」だけ。'},
+ 24:{e:'🍈',f:'小さめメロンくらい',s:'約30cm・約600g',b:'肺で呼吸の練習を始めたよ。生きる練習中!',m:'妊娠糖尿病の検査があるころ。',t:'おなかの張り・頻尿。検査続きで不安になりやすい。',p:'検査の日を聞いておいて、当日の夜「どうだった?」と電話を。結果を一緒に受け止める姿勢が大事。'},
+ 25:{e:'🥦',f:'カリフラワーくらい',s:'約32cm',b:'光を感じられるようになったよ。まぶしいの、わかるんだ。',m:'おなかがぐっとせり出してくる。',t:'腰痛・寝苦しさ。寝る姿勢が定まらない。',p:'抱き枕をプレゼントしよう。妊婦さんの睡眠の救世主。「シムスの体位」で検索!'},
+ 26:{e:'🥬',f:'レタスくらい',s:'約33cm・約900g',b:'目を開けられるようになったよ!',m:'子宮が肋骨のあたりまで大きくなる。',t:'胃もたれ・息苦しさ。一度にたくさん食べられない。',p:'「少しずつ何回も食べる」スタイルになるので、小分けで食べられるおやつや果物を送ると◎。'},
+ 27:{e:'🍍',f:'小さめパイナップルくらい',s:'約35cm・約1000g',b:'ついに1kg超え!味の違いもわかるようになったよ。',m:'もうすぐ妊娠後期。おなかの張りを感じやすい。',t:'足のむくみ・痔に悩む人も(言いにくいけど多い!)。',p:'出産まであと3ヶ月。立ち会いや休みの調整、そろそろ具体的に動き始めよう。'},
+ 28:{e:'🎃',f:'小さめかぼちゃくらい',s:'約36cm',b:'妊娠後期スタート!まぶたを開けたり閉じたりしてるよ。',m:'おなかがぐっと大きく、体への負担が増す。',t:'腰痛の悪化・眠れない夜。夜中に何度も目が覚める。',p:'ママが夜中に眠れずLINEしてきたら、朝でいいから必ず返事を。「読んでるよ」が安心になる。'},
+ 29:{e:'🥗',f:'白菜(小)くらい',s:'約37cm・約1200g',b:'骨格がしっかりして、筋肉もついてきたよ。',m:'動くのがだんだんしんどくなってくる。',t:'胃の圧迫感・食欲が出ない。おなかが大きくて靴下がはけない!',p:'出産準備品リストを一緒に作って、「ポチる担当」はパパが引き受けよう。'},
+ 30:{e:'🥬',f:'大きめキャベツくらい',s:'約38cm・約1500g',b:'記憶力が芽生え始めるともいわれてるよ。',m:'おなかの張りが増えてくる。無理は禁物。',t:'頻尿・尿もれ・不眠。くしゃみが怖い…。',p:'名前の候補、そろそろ本気で!「3つ考えたよ」とLINEすると、ママのテンションが上がるよ。'},
+ 31:{e:'🍍',f:'大きめパイナップルくらい',s:'約39cm',b:'五感がほぼ完成!外の世界の準備はバッチリ。',m:'心臓や肺が圧迫されて息切れしやすい。',t:'動悸・むくみ。少し歩くだけでゼーゼー。',p:'里帰り先への訪問日や、出産前後の予定を確定させて伝えよう。「いつ来るかわからない」が一番不安。'},
+ 32:{e:'🥒',f:'冬瓜くらい',s:'約40cm・約1800g',b:'頭を下にして、生まれる姿勢になってきたよ。',m:'いよいよ臨月が見えてくる。',t:'恥骨痛・こむら返りで夜中に飛び起きる。',p:'入院バッグの中身と置き場所を聞いておこう。当日パパが「あれどこ?」にならないために。'},
+ 33:{e:'🍈',f:'大きめメロンくらい',s:'約42cm',b:'肺の機能がほぼ完成。外で呼吸できる準備OK!',m:'前駆陣痛(練習の陣痛)を感じる人も。',t:'眠れない・トイレが近すぎる・おなかが重い。',p:'出産当日の動きをシミュレーション!「陣痛が来たら誰がどう動く?」を夫婦で確認しておこう。'},
+ 34:{e:'🎃',f:'大きめかぼちゃくらい',s:'約43cm・約2200g',b:'ママから免疫のプレゼントをもらってるところだよ。',m:'里帰り出産なら、このころまでに移動を終えるのが目安。',t:'とにかく疲れやすい。むくみもピークに。',p:'移動日は絶対に送迎&荷物持ちを。長距離移動は休憩多めのプランで。'},
+ 35:{e:'🍉',f:'小さめスイカくらい',s:'約44cm',b:'皮下脂肪がついて、ふっくら赤ちゃん体型に。',m:'子宮が最大レベルの大きさに近づく。',t:'胃の圧迫・頻尿MAX・不安が増してくる。',p:'連絡の頻度を上げよう。出産が近づくほど不安になる。「毎晩10分電話」を習慣に。'},
+ 36:{e:'🍉',f:'スイカくらい',s:'約45cm・約2500g',b:'臨月に入ったよ!いつ会えるかカウントダウン。',m:'おなかが下がってきて、胃がスッキリする人も。',t:'眠れない・前駆陣痛・「いつ来るの」のソワソワ。',p:'スマホは24時間マナーモード解除!飲酒や遠出は控えて、いつでも動ける態勢で。'},
+ 37:{e:'🍉',f:'スイカくらい',s:'約46cm',b:'正期産に入ったよ。もういつ生まれても大丈夫!',m:'出産の兆候(おしるし・破水・陣痛)をチェックする毎日。',t:'ドキドキと不安。おしるし?破水?と敏感になる。',p:'「おしるし」「破水」「陣痛10分間隔」の意味と、それぞれ何をすべきか予習しておこう。パパの落ち着きがママの安心。'},
+ 38:{e:'🍉',f:'大きめスイカくらい',s:'約47cm・約2900g',b:'頭を骨盤にしっかり固定。出発準備完了!',m:'いつ陣痛が来てもおかしくない。',t:'腰の激痛・眠れない・とにかく早く産みたい!',p:'充電は常に100%。会議中も通知に気づける工夫を。「すぐ出るからね」と伝えておこう。'},
+ 39:{e:'🍉',f:'特大スイカくらい',s:'約48cm',b:'生まれる準備、ぜんぶ完了!あとはタイミングだけ。',m:'予定日目前。心も体もスタンバイ。',t:'「まだかな」の緊張と、会いたい気持ちでいっぱい。',p:'毎日連絡。パパの声が一番の安心薬。「何時でも電話出るよ」と伝えておこう。'},
+ 40:{e:'👶',f:'もう立派な赤ちゃん',s:'約49cm・約3000g',b:'予定日!ついにこの日が来たよ。会えるのが楽しみ!',m:'予定日はあくまで目安。過ぎても慌てないで。',t:'陣痛への緊張・予定日を過ぎる焦り。',p:'生まれた瞬間から「パパ」スタート。ここまで一緒に歩いてくれてありがとう。あと少し、どっしり構えて待とう。'},
+ 41:{e:'👶',f:'もう立派な赤ちゃん',s:'約50cm',b:'おなかの居心地が良すぎるみたい。マイペースさん♪',m:'予定日超過は珍しくないこと。健診で赤ちゃんの元気を確認しながら待つよ。',t:'まわりからの「まだ?」がいちばんつらい。',p:'「まだ?」は絶対NGワード。「ゆっくりでいいよ、ふたりのペースで」と伝えてあげて。'}
+};
+
+/* ===== パパ準備ミッション ===== */
+const MISSIONS=[
+ {id:'renraku',e:'💬',n:'「体調どう?」を送る',pt:10,from:4,to:42,type:'daily',tip:'毎日のひと言がママの一番の薬'},
+ {id:'homeru',e:'🌸',n:'「がんばってるね」を伝える',pt:10,from:4,to:42,type:'daily',tip:'「がんばれ」より「がんばってるね」'},
+ {id:'learn',e:'📖',n:'妊娠の基礎を勉強する',pt:30,from:4,to:42,type:'once',tip:'「つわり」「安定期」「妊婦健診」を説明できたら合格!'},
+ {id:'tsuwari',e:'🤢',n:'つわりの種類と対策を調べる',pt:25,from:4,to:15,type:'once',tip:'吐きづわり・食べづわり・においづわり…知るだけで対応が変わる'},
+ {id:'netsuper',e:'🛒',n:'ネットスーパー・宅配を手配する',pt:30,from:4,to:42,type:'once',tip:'「家事を減らす仕組み」が最高のプレゼント'},
+ {id:'ngword',e:'🙅',n:'NGワードを覚える',pt:20,from:4,to:42,type:'once',tip:'「まだ?」「太った?」「病気じゃないんだから」は3大NGワード'},
+ {id:'name',e:'📝',n:'名前の候補を3つ考えて送る',pt:35,from:16,to:42,type:'once',tip:'姓名判断も軽く調べておくと株が上がる'},
+ {id:'ryoshin',e:'🎓',n:'両親学級(オンラインOK)を受ける',pt:35,from:16,to:36,type:'once',tip:'自治体や産院の動画講座でもOK。沐浴・おむつ替えを予習!'},
+ {id:'goods',e:'🛍️',n:'ベビーカー・チャイルドシートをリサーチ',pt:30,from:16,to:36,type:'once',tip:'候補を2〜3個にしぼってママに送ると話が早い'},
+ {id:'voice',e:'📞',n:'電話でおなかの赤ちゃんに話しかける',pt:15,from:18,to:42,type:'daily',tip:'18週ごろから耳が聞こえてるよ。照れずにどうぞ!'},
+ {id:'echo',e:'🖼️',n:'エコー写真をもらって保存する',pt:15,from:8,to:42,type:'once',tip:'スマホの待ち受けにすると好感度MAX'},
+ {id:'kyuka',e:'🗓️',n:'立ち会い・退院日の休みを会社に相談',pt:45,from:28,to:40,type:'once',tip:'早めに言うほど調整しやすい。上司への根回しはパパの仕事'},
+ {id:'ikukyu',e:'👔',n:'育休・パパ休暇を調べて相談する',pt:45,from:24,to:40,type:'once',tip:'「産後パパ育休」は分割取得もできるよ'},
+ {id:'junbi',e:'🎒',n:'入院バッグの中身と置き場所を聞く',pt:30,from:30,to:40,type:'once',tip:'当日「あれどこ?」にならないために'},
+ {id:'flow',e:'🚕',n:'陣痛が来た日の動きをシミュレーション',pt:35,from:32,to:42,type:'once',tip:'「おしるし」「破水」「10分間隔」で何をするか言えたら合格'},
+ {id:'buy',e:'📦',n:'出産準備品の購入担当になる',pt:35,from:24,to:40,type:'once',tip:'リストをもらって「ポチる係」はパパ!'},
+ {id:'okuru',e:'🍰',n:'ごほうびスイーツやお花を送る',pt:25,from:4,to:42,type:'daily',tip:'お取り寄せなら離れてても送れる。サプライズ便は効果絶大'},
+ {id:'sofa',e:'🚗',n:'里帰り・帰省の送迎&荷物持ち',pt:30,from:28,to:42,type:'once',tip:'移動日は休憩多めのプランで'}
+];
+const LEVELS=[
+ {pt:0,name:'たまごパパ',emoji:'🥚'},{pt:100,name:'ひよこパパ',emoji:'🐣'},{pt:250,name:'べんきょう中パパ',emoji:'📖'},
+ {pt:450,name:'じゅんび上手パパ',emoji:'💪'},{pt:700,name:'たよれるパパ',emoji:'⭐'},{pt:1000,name:'スーパーパパ',emoji:'👑'},{pt:1500,name:'レジェンドパパ',emoji:'🏆'}
+];
+const SYMPTOMS=['🤢 つわり','😪 ねむい','🤕 頭痛','😖 腰痛','🦵 むくみ','😵 胃もたれ','⚡ こむら返り','🎈 おなかの張り','🚽 トイレが近い','💤 眠れない','😰 不安なきもち','😊 きょうは元気!'];
+const ONEGAI=[
+ '📝 名前の候補、3つ考えてきて',
+ '📞 今夜、おなかの赤ちゃんに話しかけてあげて',
+ '🗓️ 次の健診の日、電話つないでね',
+ '🛍️ ベビー用品のリサーチお願い',
+ '🍓 おいしいもの送ってほしいな…',
+ '📚 両親学級の動画、見ておいてね'
+];
+const NEGIRAI=[
+ {e:'🍀',t:'いつもふたり分、がんばってくれてありがとう'},
+ {e:'💐',t:'今日もおつかれさま。無理しないでね'},
+ {e:'📞',t:'声が聞きたいな。今夜電話してもいい?'},
+ {e:'🍰',t:'好きなスイーツ送るよ!何がいい?'},
+ {e:'👶',t:'赤ちゃんに「パパだよ〜」って伝えといて'},
+ {e:'🏠',t:'早く会いたいよ。あと少し、よろしくね'}
+];
+
+let D=load();
+let viewWeek=null; // 今週タブの表示週
+
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.due)return d;}catch(e){}
+  return null;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(D));}
+function blank(role,due,baby){
+  return {role:role||'mama',due:due,baby:baby||'',days:{},onceDone:{},pts:0};
+}
+function todayKey(d){const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');}
+function day(k){k=k||todayKey();if(!D.days[k])D.days[k]={sym:[],note:'',kicks:[],done:[]};const d=D.days[k];d.sym=d.sym||[];d.kicks=d.kicks||[];d.done=d.done||[];return d;}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function babyName(){return D.baby||'赤ちゃん';}
+
+/* ===== 週数計算 ===== */
+function pregInfo(){
+  const due=new Date(D.due+'T00:00:00');
+  const start=new Date(due.getTime()-280*86400000);
+  const now=new Date();now.setHours(0,0,0,0);
+  const days=Math.floor((now-start)/86400000);
+  const week=Math.floor(days/7), wd=days%7;
+  const left=Math.ceil((due-now)/86400000);
+  return {week,wd,left,due};
+}
+function clampWeek(w){return Math.max(4,Math.min(41,w));}
+function triLabel(w){return w>=36?'臨月':w>=28?'妊娠後期':w>=16?'妊娠中期(安定期)':'妊娠初期';}
+function wkData(w){return WEEKS[clampWeek(w)];}
+
+/* ===== setup ===== */
+let pickedRole=null;
+function pickRole(r){pickedRole=r;document.getElementById('pick-mama').classList.toggle('sel',r==='mama');document.getElementById('pick-papa').classList.toggle('sel',r==='papa');}
+function finishSetup(){
+  if(!pickedRole){toast('役割をえらんでね');return;}
+  const due=document.getElementById('setup-due').value;
+  if(!due){toast('出産予定日を入れてね');return;}
+  D=blank(pickedRole,due,document.getElementById('setup-baby').value.trim());
+  save();
+  document.getElementById('setup').classList.add('hidden');
+  renderAll();
+}
+
+/* ===== tabs ===== */
+function showTab(t){
+  ['today','week','mission','record','settings'].forEach(x=>{
+    document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
+    document.querySelector('nav button[data-tab="'+x+'"]').classList.toggle('on',x===t);
+  });
+  if(t==='week')viewWeek=null;
+  renderAll();
+  window.scrollTo(0,0);
+}
+
+/* ===== LINE ===== */
+function lineShare(text){
+  window.open('https://line.me/R/share?text='+encodeURIComponent(text),'_blank');
+}
+
+/* ===== きょう ===== */
+function renderToday(){
+  const p=pregInfo();const w=clampWeek(p.week);const wd=wkData(p.week);
+  document.getElementById('cc-week').textContent=`いま 妊娠${Math.max(0,p.week)}週${p.wd}日`;
+  document.getElementById('cc-days').innerHTML=p.left>0
+    ?`${esc(babyName())}に会えるまで あと<b>${p.left}</b>日`
+    :p.left===0?`きょうが出産予定日!<b>💕</b>`:`予定日を<b>${-p.left}</b>日すぎたよ。もうすぐ会えるね`;
+  document.getElementById('cc-tri').textContent=`${triLabel(p.week)} ・ いま${wd.f}(${wd.s})`;
+
+  document.getElementById('today-mama').classList.toggle('hidden',D.role!=='mama');
+  document.getElementById('today-papa').classList.toggle('hidden',D.role!=='papa');
+
+  if(D.role==='mama'){
+    // 体調チップ
+    const dd=day();
+    const grid=document.getElementById('sym-grid');grid.innerHTML='';
+    SYMPTOMS.forEach(s=>{
+      const b=document.createElement('button');b.className='chip'+(dd.sym.includes(s)?' on':'');b.textContent=s;
+      b.onclick=()=>{const i=dd.sym.indexOf(s);if(i>=0)dd.sym.splice(i,1);else dd.sym.push(s);save();renderToday();};
+      grid.appendChild(b);
+    });
+    const note=document.getElementById('today-note');
+    note.value=dd.note||'';
+    note.onchange=()=>{dd.note=note.value;save();};
+    // 胎動
+    document.getElementById('kick-count').innerHTML=`きょうの胎動 <b>${dd.kicks.length}</b> 回`;
+    // 赤ちゃんメッセージ
+    document.getElementById('baby-msg').textContent=babyMsgText();
+    // お願い
+    const ol=document.getElementById('onegai-list');ol.innerHTML='';
+    ONEGAI.forEach((o,i)=>{
+      ol.insertAdjacentHTML('beforeend',`<label class="onegai-row"><input type="checkbox" data-onegai="${i}">${esc(o)}</label>`);
+    });
+  }else{
+    // パパ用：今週のママ情報
+    document.getElementById('papa-mama-info').innerHTML=
+      `<div class="info-block ib-tsurai" style="margin-top:0"><div class="bt">😢 この時期のママがつらいこと</div>${esc(wd.t)}</div>
+       <div class="info-block ib-papa"><div class="bt">💙 パパにできること</div>${esc(wd.p)}</div>`;
+    const ng=document.getElementById('negirai-grid');ng.innerHTML='';
+    NEGIRAI.forEach(s=>{
+      const b=document.createElement('button');b.className='stamp';
+      const msg=s.t.replace('赤ちゃん',babyName());
+      b.innerHTML=`<span class="big">${s.e}</span>${esc(msg)}`;
+      b.onclick=()=>lineShare(`${s.e} ${msg}`);
+      ng.appendChild(b);
+    });
+    // きょうのミッション(毎日型のみ抜粋)
+    const list=document.getElementById('papa-today-missions');list.innerHTML='';
+    activeMissions().filter(m=>m.type==='daily').forEach(m=>list.appendChild(taskRow(m)));
+  }
+}
+function babyMsgText(){
+  const p=pregInfo();const wd=wkData(p.week);const nm=babyName();
+  const w=Math.max(0,p.week);
+  if(p.left<=0)return `ぱぱへ👶 ${nm}だよ。ついに予定日!もうすぐ会えるね。ママをいっぱい褒めてあげてね。がんばるからまっててね💕`;
+  return `ぱぱへ👶 ${nm}だよ。いまね、${wd.f}の大きさになったよ(${wd.s})。${wd.b} ママのおなかの中はあったかいよ。あえるまであと${p.left}日、ママのことよろしくね💕`;
+}
+function addKick(){
+  const dd=day();
+  const n=new Date();
+  dd.kicks.push(n.getHours()+':'+String(n.getMinutes()).padStart(2,'0'));
+  save();renderToday();
+  toast('👣 きろくしたよ!('+dd.kicks.length+'回目)');
+}
+function sendKick(){
+  const p=pregInfo();const wd=wkData(p.week);const dd=day();
+  lineShare(`👣 たいどう速報!\nたった今、${babyName()}が動いたよ!(きょう${dd.kicks.length}回目)\nいま妊娠${Math.max(0,p.week)}週。${wd.f}の大きさだよ${wd.e}\nあと${Math.max(0,p.left)}日で会えるね👶`);
+}
+function sendReport(){
+  const p=pregInfo();const wd=wkData(p.week);const dd=day();
+  let t=`🤰 きょうのママ&たいじレポート\n妊娠${Math.max(0,p.week)}週${p.wd}日(${triLabel(p.week)})\n👶 ${babyName()}はいま${wd.f}(${wd.s})\n`;
+  if(dd.kicks.length)t+=`👣 きょうの胎動: ${dd.kicks.length}回\n`;
+  t+=dd.sym.length?`🩺 きょうの体調: ${dd.sym.join('、')}\n`:`🩺 きょうの体調: とくに記録なし\n`;
+  if(dd.note)t+=`💬 ${dd.note}\n`;
+  t+=p.left>0?`会えるまであと${p.left}日💕`:`予定日${p.left===0?'当日':`を${-p.left}日経過`}!いつでも連絡とれるようにしててね📱`;
+  lineShare(t);
+}
+function sendBabyMsg(){lineShare(babyMsgText());}
+function sendOnegai(){
+  const checks=[...document.querySelectorAll('[data-onegai]:checked')].map(c=>ONEGAI[+c.dataset.onegai]);
+  const free=document.getElementById('onegai-free').value.trim();
+  if(free)checks.push('💌 '+free);
+  if(!checks.length){toast('お願いをえらんでね');return;}
+  lineShare(`📮 ママ&${babyName()}からのお願いミッション!\n`+checks.map(c=>'・'+c).join('\n')+`\nクリアしたら「できた!」って教えてね😆`);
+}
+
+/* ===== 今週タブ ===== */
+function moveWeek(d){
+  const p=pregInfo();
+  if(viewWeek===null)viewWeek=clampWeek(p.week);
+  viewWeek=clampWeek(viewWeek+d);
+  renderWeek();
+}
+function renderWeek(){
+  const p=pregInfo();
+  const w=viewWeek===null?clampWeek(p.week):viewWeek;
+  const wd=WEEKS[w];
+  const isNow=w===clampWeek(p.week);
+  document.getElementById('wk-label').textContent=`妊娠${w}週`+(isNow?'(今週)':'');
+  document.getElementById('wk-fruit').textContent=wd.e;
+  document.getElementById('wk-fname').textContent=wd.f;
+  document.getElementById('wk-fsize').textContent=wd.s+' ・ '+triLabel(w);
+  document.getElementById('wk-baby').textContent=wd.b;
+  document.getElementById('wk-mama').textContent=wd.m;
+  document.getElementById('wk-tsurai').textContent=wd.t;
+  document.getElementById('wk-papa').textContent=wd.p;
+}
+function sendWeek(){
+  const p=pregInfo();
+  const w=viewWeek===null?clampWeek(p.week):viewWeek;
+  const wd=WEEKS[w];
+  lineShare(`👶 妊娠${w}週の${babyName()}とママ\n${wd.e} 赤ちゃんは${wd.f}(${wd.s})\n・${wd.b}\n🤰 ママのからだ: ${wd.m}\n😢 いまつらいこと: ${wd.t}\n💙 パパにできること: ${wd.p}`);
+}
+
+/* ===== ミッション ===== */
+function curWeek(){return clampWeek(pregInfo().week);}
+function activeMissions(){
+  const w=Math.max(4,Math.min(42,pregInfo().week));
+  return MISSIONS.filter(m=>w>=m.from&&w<=m.to);
+}
+function missionDoneToday(m){
+  if(m.type==='once')return !!D.onceDone[m.id];
+  return day().done.includes(m.id);
+}
+function taskRow(m){
+  const div=document.createElement('div');div.className='task'+(missionDoneToday(m)?' is-done':'');
+  const tag=m.type==='daily'?'<span class="period-tag pt-daily">毎日</span>':'<span class="period-tag pt-once">1回クリア</span>';
+  div.innerHTML=`<span class="emoji">${m.e}</span>
+    <div class="body"><div class="name">${esc(m.n)}${tag}</div><div class="tip">${esc(m.tip)}</div></div>
+    <span class="pt">${m.pt}pt</span>`;
+  const btn=document.createElement('button');btn.className='done-btn';
+  btn.textContent=missionDoneToday(m)?'クリア済':'できた!';
+  btn.onclick=()=>doMission(m);
+  div.appendChild(btn);
+  return div;
+}
+function doMission(m){
+  if(missionDoneToday(m)){toast(m.type==='daily'?'きょうはもうクリア済だよ':'クリア済だよ、えらい!');return;}
+  if(m.type==='once')D.onceDone[m.id]=todayKey();
+  else day().done.push(m.id);
+  D.pts=(D.pts||0)+m.pt;
+  save();
+  celebrate(m);
+  renderAll();
+}
+function celebrate(m){
+  const c=document.getElementById('celebrate');
+  const msgs=['ママと赤ちゃんが喜んでる!','父親レベルが上がった!','離れてても、ちゃんとパパ!','その調子!素敵なパパになるよ!'];
+  c.innerHTML=`<div class="box"><div class="big">${m.e}</div><div class="msg">${msgs[Math.floor(Math.random()*msgs.length)]}</div><div class="pt">+${m.pt}pt GET!</div></div>`;
+  c.classList.remove('hidden');
+  setTimeout(()=>c.classList.add('hidden'),1600);
+}
+function levelOf(pt){
+  let lv=LEVELS[0],next=null;
+  for(let i=0;i<LEVELS.length;i++){if(pt>=LEVELS[i].pt)lv=LEVELS[i];else{next=LEVELS[i];break;}}
+  return {lv,next};
+}
+function renderMission(){
+  const pt=D.pts||0;
+  const {lv,next}=levelOf(pt);
+  document.getElementById('level-total').textContent=`・ 累計${pt}pt`;
+  document.getElementById('level-name').textContent=`${lv.emoji} ${lv.name}`;
+  const fill=next?Math.min(100,Math.round((pt-lv.pt)/(next.pt-lv.pt)*100)):100;
+  document.getElementById('level-bar-fill').style.width=fill+'%';
+  document.getElementById('level-pts').textContent=next?`あと${next.pt-pt}ptで「${next.emoji} ${next.name}」!`:'最高ランク!もう立派なパパ!';
+  const list=document.getElementById('mission-list');list.innerHTML='';
+  const ms=activeMissions();
+  if(!ms.length){list.innerHTML='<p class="sub">いまの週数のミッションはないよ</p>';}
+  ms.forEach(m=>list.appendChild(taskRow(m)));
+}
+function sendMissionReport(){
+  const dd=day();
+  const doneToday=MISSIONS.filter(m=>(dd.done.includes(m.id))||(D.onceDone[m.id]===todayKey()));
+  const {lv}=levelOf(D.pts||0);
+  let t=`💪 パパの父親準備ミッション報告!\n`;
+  t+=doneToday.length?doneToday.map(m=>`${m.e} ${m.n} クリア!`).join('\n')+'\n':'きょうはこれから!\n';
+  t+=`いまのパパ準備度: ${lv.emoji} ${lv.name}(累計${D.pts||0}pt)\n${babyName()}、パパも準備がんばってるよ👶`;
+  lineShare(t);
+}
+
+/* ===== きろく ===== */
+function renderRecord(){
+  const keys=Object.keys(D.days).sort().reverse().slice(0,14);
+  const fmt=k=>{const [y,m,d]=k.split('-');return `${+m}/${+d}`;};
+  const kl=document.getElementById('kick-log');
+  const rowsK=keys.filter(k=>day(k).kicks.length).map(k=>`<div class="log-row"><span class="d">${fmt(k)}</span> 👣 ${day(k).kicks.length}回 <span class="sub">(${day(k).kicks.slice(-5).join(' / ')}${day(k).kicks.length>5?' …':''})</span></div>`);
+  kl.innerHTML=rowsK.length?rowsK.join(''):'<p class="sub">まだ記録がないよ。「きょう」タブでポコッと押してね。</p>';
+  const sl=document.getElementById('sym-log');
+  const rowsS=keys.filter(k=>day(k).sym.length||day(k).note).map(k=>`<div class="log-row"><span class="d">${fmt(k)}</span> ${esc(day(k).sym.join('、'))}${day(k).note?` <span class="sub">「${esc(day(k).note)}」</span>`:''}</div>`);
+  sl.innerHTML=rowsS.length?rowsS.join(''):'<p class="sub">まだ記録がないよ。</p>';
+  const ml=document.getElementById('mission-log');
+  const rowsM=[];
+  keys.forEach(k=>{
+    day(k).done.forEach(id=>{const m=MISSIONS.find(x=>x.id===id);if(m)rowsM.push(`<div class="log-row"><span class="d">${fmt(k)}</span> ${m.e} ${esc(m.n)} <span class="sub">+${m.pt}pt</span></div>`);});
+  });
+  Object.keys(D.onceDone||{}).sort((a,b)=>D.onceDone[a]<D.onceDone[b]?1:-1).forEach(id=>{
+    const m=MISSIONS.find(x=>x.id===id);if(m)rowsM.push(`<div class="log-row"><span class="d">${fmt(D.onceDone[id])}</span> ${m.e} ${esc(m.n)} <span class="sub">+${m.pt}pt ・ 1回クリア</span></div>`);
+  });
+  ml.innerHTML=rowsM.length?rowsM.slice(0,30).join(''):'<p class="sub">クリアしたミッションがここに残るよ。</p>';
+}
+
+/* ===== 設定 ===== */
+function renderSettings(){
+  document.getElementById('set-role').value=D.role;
+  document.getElementById('set-due').value=D.due;
+  document.getElementById('set-baby').value=D.baby||'';
+}
+function saveSettings(){
+  const due=document.getElementById('set-due').value;
+  if(!due){toast('出産予定日を入れてね');return;}
+  D.role=document.getElementById('set-role').value;
+  D.due=due;
+  D.baby=document.getElementById('set-baby').value.trim();
+  save();renderAll();toast('保存したよ!');
+}
+function backupData(){
+  const blob=new Blob([JSON.stringify(D)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='taijilog-backup.json';a.click();
+}
+function restoreData(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(d&&d.due){D=d;save();renderAll();toast('読み込んだよ!');}else toast('ファイルが違うみたい');}catch(e){toast('読み込めなかった…');}};
+  r.readAsText(f);
+}
+
+/* ===== common ===== */
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),1800);
+}
+function renderAll(){
+  if(!D)return;
+  document.getElementById('role-badge').textContent=D.role==='mama'?'🤰 ママモード':'👨 パパモード';
+  renderToday();renderWeek();renderMission();renderRecord();renderSettings();
+}
+
+/* ===== init ===== */
+if(!D){document.getElementById('setup').classList.remove('hidden');}
+else renderAll();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>

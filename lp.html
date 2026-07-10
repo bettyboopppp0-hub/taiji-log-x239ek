@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>たいじログ｜離れてても、パパもいっしょに。単身赴任・里帰り夫婦のマタニティ共有アプリ</title>
+<meta name="description" content="単身赴任・里帰り出産で離れて過ごす妊娠期に。胎動速報・週数ガイド・パパの父親準備ミッションで、遠くのパパに「もうすぐ父親」の実感を。買い切り、インストール不要。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --main:#d96a86;--main-l:#fcecf0;--navy:#5a4550;--papa:#4a7fb5;
+  --gold:#e8b93c;--bg:#fbf7f8;--text:#4a3e43;--sub:#95848b;--line:#f0e2e6;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Zen Maru Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:15.5px;line-height:1.9}
+.wrap{max-width:560px;margin:0 auto;padding:0 20px}
+section{padding:52px 0}
+h2{font-size:22px;font-weight:900;color:var(--navy);text-align:center;margin-bottom:8px}
+.lead{text-align:center;color:var(--sub);font-size:13.5px;margin-bottom:28px}
+.cta{display:block;background:linear-gradient(135deg,#e88a3c,#e8b93c);color:#fff;text-align:center;border-radius:999px;font-weight:900;font-size:17px;padding:17px;text-decoration:none;box-shadow:0 6px 18px rgba(232,138,60,.35);transition:transform .15s}
+.cta:active{transform:scale(.97)}
+.cta small{display:block;font-size:11px;font-weight:500;opacity:.9}
+/* hero */
+.hero{background:linear-gradient(160deg,#b8536e,#d96a86 55%,#e89aae);color:#fff;padding:56px 0 64px;text-align:center}
+.hero .badge{display:inline-block;background:rgba(255,255,255,.22);border-radius:999px;padding:4px 16px;font-size:12px;font-weight:700;margin-bottom:14px}
+.hero h1{font-size:29px;font-weight:900;line-height:1.55}
+.hero .sub{margin:14px 0 26px;font-size:14px;opacity:.95}
+.phone{background:#fff;border-radius:28px;padding:14px 12px;max-width:290px;margin:0 auto 28px;box-shadow:0 18px 50px rgba(0,0,0,.28);color:var(--text);text-align:left}
+.phone .bar{background:linear-gradient(135deg,#c65878,#e89aae);color:#fff;border-radius:14px;padding:12px;margin-bottom:10px;text-align:center}
+.phone .bar .t{font-size:10px;opacity:.9}
+.phone .bar .n{font-weight:900;font-size:15px}
+.phone .bar .d{font-size:11px;margin-top:2px}
+.phone .row{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;padding:7px 4px;border-bottom:1px dashed var(--line)}
+.phone .row:last-child{border:none}
+.phone .row .go{margin-left:auto;background:#06c755;color:#fff;border-radius:99px;font-size:9.5px;padding:3px 9px;font-weight:900;white-space:nowrap}
+/* checks */
+.check-list{background:#fff;border-radius:18px;padding:22px;box-shadow:0 2px 10px rgba(90,69,80,.07)}
+.check-list li{list-style:none;padding:9px 0 9px 34px;position:relative;border-bottom:1px dashed var(--line);font-weight:700;font-size:14.5px}
+.check-list li:last-child{border:none}
+.check-list li::before{content:'😢';position:absolute;left:0}
+.arrow-msg{text-align:center;font-weight:900;color:var(--main);font-size:17px;margin-top:24px}
+/* features */
+.feat{background:#fff;border-radius:18px;padding:20px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,69,80,.07);display:flex;gap:14px}
+.feat .ic{font-size:32px;flex-shrink:0}
+.feat h3{font-size:15.5px;font-weight:900;color:var(--navy);margin-bottom:4px}
+.feat p{font-size:13.5px}
+.feat .new{display:inline-block;background:var(--main);color:#fff;border-radius:99px;font-size:10px;font-weight:900;padding:1px 8px;margin-left:4px;vertical-align:2px}
+/* steps */
+.step{display:flex;gap:14px;margin-bottom:18px;align-items:flex-start}
+.step .num{background:var(--main);color:#fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.step h3{font-size:15px;font-weight:900;color:var(--navy)}
+.step p{font-size:13.5px}
+/* voice */
+.voice{background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 2px 10px rgba(90,69,80,.07);font-size:13.5px}
+.voice .who{color:var(--sub);font-size:12px;margin-top:8px;font-weight:700}
+.voice .stars{color:var(--gold);letter-spacing:2px}
+/* price */
+.price-box{background:#fff;border-radius:22px;padding:30px 24px;text-align:center;box-shadow:0 4px 20px rgba(90,69,80,.1);border:2.5px solid var(--gold)}
+.price-box .old{color:var(--sub);text-decoration:line-through;font-size:15px}
+.price-box .now{font-size:42px;font-weight:900;color:#e8583c}
+.price-box .now small{font-size:16px}
+.price-box .note{font-size:12px;color:var(--sub);margin:8px 0 18px}
+/* faq */
+.faq{background:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 10px rgba(90,69,80,.07)}
+.faq .q{font-weight:900;color:var(--navy);font-size:14px}
+.faq .a{font-size:13.5px;margin-top:4px}
+footer{text-align:center;padding:34px 0 46px;color:var(--sub);font-size:11.5px}
+.fade{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s}
+.fade.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="badge">🤰 単身赴任・里帰り夫婦のマタニティ共有アプリ</span>
+    <h1>離れてても、<br>パパもいっしょに。</h1>
+    <p class="sub">単身赴任、里帰り出産——<br>そばにいないパパは、実感がないのが当たり前。<br>だから<b>「実感が届く仕組み」</b>をつくりました。</p>
+    <div class="phone">
+      <div class="bar">
+        <div class="t">いま 妊娠24週3日 ・ 妊娠中期</div>
+        <div class="n">👶 会えるまで あと109日</div>
+        <div class="d">いま小さめメロンくらい(約600g)</div>
+      </div>
+      <div class="row">👣 たった今、ぽこちゃんが動いたよ! <span class="go">LINEで速報</span></div>
+      <div class="row">💌 ぱぱへ。ぼく600gになったよ <span class="go">送る</span></div>
+      <div class="row">😢 今週のママ: 検査続きで不安な時期 <span class="go">共有</span></div>
+      <div class="row">🎯 パパミッション: 名前の候補を3つ考える</div>
+    </div>
+    <a class="cta" href="#price" style="max-width:340px;margin:0 auto">今すぐはじめる<small>買い切り・インストール不要</small></a>
+  </div>
+</div>
+
+<section>
+  <div class="wrap fade">
+    <h2>離れて過ごす妊娠期、<br>こんな不安ありませんか?</h2>
+    <p class="lead">ひとつでも当てはまったら、このアプリの出番です</p>
+    <ul class="check-list">
+      <li>夫が単身赴任。妊娠が「他人事」になってる気がする</li>
+      <li>里帰り中、夫との温度差がどんどん広がる</li>
+      <li>「胎動すごいよ!」を伝えても「へー」で終わる</li>
+      <li>私のつわりのつらさ、全然わかってもらえない</li>
+      <li>このまま父親の自覚ゼロで出産日が来そうで怖い</li>
+      <li>毎日何を報告すればいいのか、私も分からない</li>
+    </ul>
+    <p class="arrow-msg">▼ 悪いのはパパじゃなく、「実感が届かない距離」です</p>
+    <p style="text-align:center;font-size:13.5px;margin-top:14px">おなかの中の変化は、そばにいても見えないもの。<br>離れていたらなおさらです。<br>だから——<b>ママの30秒の記録が、パパの実感に変わる</b>アプリを。</p>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="wrap fade">
+    <h2>7つの機能で、ふたりの妊娠に</h2>
+    <p class="lead">ママ・パパそれぞれのスマホで使えます</p>
+    <div class="feat"><span class="ic">📅</span><div><h3>予定日を入れるだけ。週数ガイドが自動表示<span class="new">イチオシ</span></h3><p>出産予定日を入力すると、妊娠4〜41週まで毎週自動で切り替わる「今週ガイド」。赤ちゃんの大きさ(レモンくらい🍋)や成長だけでなく、<b>その週のママの体調の変化・つらいことが多い症状・パパにできること</b>まで自動で出てきます。</p></div></div>
+    <div class="feat"><span class="ic">👣</span><div><h3>たいどうカウンター&「動いたよ!」速報</h3><p>ポコッと動いたらワンタップで記録。そのままLINEで「たった今、動いたよ!(きょう3回目)」の速報をパパへ。リアルタイムで感動を分け合えます。</p></div></div>
+    <div class="feat"><span class="ic">🩺</span><div><h3>きょうの体調を30秒で記録→共有</h3><p>つわり・むくみ・眠れない…当てはまる症状をタップするだけ。週数・赤ちゃんの大きさ入りの「きょうのレポート」がワンタップでLINEに。「大丈夫?」が届くきっかけになります。</p></div></div>
+    <div class="feat"><span class="ic">💌</span><div><h3>赤ちゃんからパパへのお手紙</h3><p>「ぱぱへ。いまレモンの大きさになったよ。ママをよろしくね」——赤ちゃん目線のメッセージを自動生成してLINEで送信。パパの心を直撃します。</p></div></div>
+    <div class="feat"><span class="ic">🎯</span><div><h3>パパの父親準備ミッション</h3><p>「名前の候補を3つ」「両親学級を受ける」「立ち会いの休みを会社に相談」——週数に合わせて今やるべき準備が出題。クリアすると、たまごパパ→ひよこパパ→レジェンドパパへランクアップ!</p></div></div>
+    <div class="feat"><span class="ic">📮</span><div><h3>お願いミッション&ねぎらいスタンプ</h3><p>ママからは「名前考えてきて」などの宿題をLINEでパパに。パパからは「ふたり分がんばってくれてありがとう」をワンタップで。離れてても気持ちが往復します。</p></div></div>
+    <div class="feat"><span class="ic">⏳</span><div><h3>会えるまでカウントダウン</h3><p>「あと109日で会える」。ふたりで同じ数字を眺めるだけで、離れている時間が「一緒に待つ時間」に変わります。</p></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap fade">
+    <h2>使い方はかんたん3ステップ</h2>
+    <p class="lead">アプリストア不要。ブラウザで開くだけ</p>
+    <div class="step"><span class="num">1</span><div><h3>ふたりのスマホでリンクを開く</h3><p>購入後に届くリンクをそれぞれのスマホで開いてホーム画面に追加。出産予定日を入れたら準備完了。</p></div></div>
+    <div class="step"><span class="num">2</span><div><h3>ママは30秒記録、パパはミッション</h3><p>ママは胎動と体調をタップして、LINEでパッと共有。パパは週数に合わせた父親準備ミッションをクリアして報告。</p></div></div>
+    <div class="step"><span class="num">3</span><div><h3>「今週ガイド」をふたりで見る</h3><p>赤ちゃんの成長とママのつらさが毎週自動更新。パパは「今できること」がわかるから、距離があっても置いていかれません。</p></div></div>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="wrap fade">
+    <h2>使ったご夫婦の声</h2>
+    <p class="lead">※サンプルイメージ・個人の感想です</p>
+    <div class="voice"><span class="stars">★★★★★</span><br>「単身赴任の夫から初めて『今週つらい時期なんだね、大丈夫?』とLINEが来て泣きました。私が説明しなくても、アプリが伝えてくれる」<div class="who">30代ママ・妊娠7ヶ月・夫が単身赴任</div></div>
+    <div class="voice"><span class="stars">★★★★★</span><br>「正直、実感ゼロでした。『動いたよ!』速報と赤ちゃんからの手紙で、急に父親のスイッチが入った。ミッションのおかげで育休の申請も早めに動けた」<div class="who">30代パパ・妻が里帰り中</div></div>
+    <div class="voice"><span class="stars">★★★★☆</span><br>「毎日何を報告すればいいか分からなかったけど、体調タップするだけなので続く。会えるまでカウントダウンを2人で見るのが日課です」<div class="who">20代ママ・妊娠5ヶ月</div></div>
+  </div>
+</section>
+
+<section id="price">
+  <div class="wrap fade">
+    <h2>価格</h2>
+    <p class="lead">アプリは買い切り。月額料金はありません</p>
+    <div class="price-box">
+      <p style="font-weight:900;color:var(--navy)">🤰 たいじログ</p>
+      <p class="old">通常価格 980円</p>
+      <p class="now">480<small>円(税込)</small></p>
+      <p class="note">リリース記念価格 ・ 買い切り ・ 夫婦2台で使えてこの価格<br>機能は随時アップデート予定</p>
+      <a class="cta buy-btn" href="#">リリース記念価格で購入する<small>お支払い後すぐに使えます</small></a>
+    </div>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="wrap fade">
+    <h2>よくある質問</h2>
+    <div class="faq"><p class="q">Q. アプリのインストールは必要?</p><p class="a">不要です。リンクをブラウザで開いて「ホーム画面に追加」するだけで、アプリのように使えます(iPhone・Android両対応)。</p></div>
+    <div class="faq"><p class="q">Q. 夫婦2人で使うのに2つ買う必要はある?</p><p class="a">いいえ、1回の購入でおふたりのスマホでお使いいただけます。</p></div>
+    <div class="faq"><p class="q">Q. データはどこに保存されるの?</p><p class="a">それぞれのスマホの中だけに保存され、外部に送信されません。共有はご自身のLINEから送る形なので安心です。</p></div>
+    <div class="faq"><p class="q">Q. 週数の体調情報はどこまで正確?</p><p class="a">一般的な目安をやさしくまとめたものです。個人差がありますので、気になる症状は必ずかかりつけ医にご相談ください。</p></div>
+    <div class="faq"><p class="q">Q. 出産したあとは使えなくなる?</p><p class="a">記録はそのまま残ります。産後は姉妹アプリ「ワンオペ育児おたすけ手帳」「パパヒーロー」もどうぞ。</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap fade" style="text-align:center">
+    <h2>距離は、実感の言い訳に<br>ならない。</h2>
+    <p style="margin:10px 0 26px">10ヶ月は、たった一度きり。<br>離れていても、ふたりで妊婦になりませんか?</p>
+    <a class="cta buy-btn" href="#" style="max-width:360px;margin:0 auto">リリース記念 480円ではじめる<small>買い切り・夫婦2台OK・アップデート無料</small></a>
+  </div>
+</section>
+
+<footer>たいじログ<br>© 2026 taiji-log</footer>
+
+<script>
+// 購入リンク：販売開始時にBASE等の商品ページURLをここに設定
+const BUY_URL = '';
+document.querySelectorAll('.buy-btn').forEach(btn => {
+  if (BUY_URL) {
+    btn.href = BUY_URL;
+    btn.target = '_blank';
+    btn.rel = 'noopener';
+  } else {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      alert('まもなく販売開始!もう少しだけお待ちください🤰');
+    });
+  }
+});
+// スクロールフェードイン
+const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) en.target.classList.add('in'); }), { threshold: .12 });
+document.querySelectorAll('.fade').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
