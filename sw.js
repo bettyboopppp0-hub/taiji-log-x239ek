@@ -1,7 +1,8 @@
-const CACHE = 'taijilog-v3';
+const CACHE = 'taijilog-v4';
 const ASSETS = [
   './',
   './index.html',
+  './himitsu.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
