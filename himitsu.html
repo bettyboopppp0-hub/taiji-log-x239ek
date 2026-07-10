@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ひみつノート | たいじログ</title>
+<meta name="description" content="書いても、どこにも残らないノート。保存されない・送信されない・学習されない。閉じたら消える、あなただけの吐き出し場所。">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#d96a86">
+<style>
+:root{
+  --main:#d96a86; --main-l:#fcecf0; --navy:#5a4550;
+  --gold:#e8b93c; --bg:#fbf7f8; --card:#ffffff;
+  --text:#4a3e43; --sub:#95848b; --line:#f0e2e6;
+  --radius:18px; --shadow:0 2px 10px rgba(90,69,80,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Zen Maru Gothic','Hiragino Maru Gothic ProN','BIZ UDGothic','Yu Gothic',sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.7;
+  padding-bottom:calc(30px + env(safe-area-inset-bottom));
+}
+header{
+  background:linear-gradient(135deg,#c65878,#e89aae);color:#fff;
+  padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+header h1{font-size:17px;font-weight:900;letter-spacing:.05em}
+.role-badge{background:rgba(255,255,255,.25);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700}
+main{max-width:520px;margin:0 auto;padding:16px 14px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sub{color:var(--sub);font-size:12px}
+
+/* 約束カード */
+.promise{
+  background:linear-gradient(135deg,#c65878,#e89aae);color:#fff;
+  border-radius:var(--radius);padding:18px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.promise::after{content:'🤫';position:absolute;right:2px;bottom:-14px;font-size:74px;opacity:.15}
+.promise .pt{font-size:15px;font-weight:900;margin-bottom:8px}
+.promise ul{list-style:none}
+.promise li{font-size:13px;font-weight:700;padding:3px 0;display:flex;gap:7px;align-items:baseline}
+.promise li::before{content:'✓';font-weight:900;background:rgba(255,255,255,.25);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transform:translateY(2px)}
+
+/* 書く場所 */
+.paper{position:relative}
+#secret{
+  width:100%;min-height:44vh;resize:vertical;
+  border:1.5px solid var(--line);border-radius:14px;
+  padding:14px;font-family:inherit;font-size:16px;line-height:1.9;
+  background:#fffdfa;color:var(--text);
+  background-image:repeating-linear-gradient(transparent,transparent calc(1.9em - 1px),#f6e8ec calc(1.9em - 1px),#f6e8ec 1.9em);
+  background-attachment:local;
+}
+#secret:focus{outline:none;border-color:var(--main)}
+#secret::placeholder{color:#cbb4bc;font-size:14px}
+.counter{text-align:right;font-size:11px;color:var(--sub);margin-top:6px}
+.btn-row{display:flex;gap:10px;margin-top:12px}
+.btn{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:none;border-radius:999px;font-family:inherit;font-weight:900;font-size:15px;
+  padding:14px 18px;cursor:pointer;transition:transform .1s;
+}
+.btn:active{transform:scale(.96)}
+.btn-burn{background:linear-gradient(135deg,#e8874a,#d95a3c);color:#fff;box-shadow:0 4px 14px rgba(217,90,60,.35)}
+.btn-burn:disabled{background:#e8dce0;color:#b5a3ab;box-shadow:none;cursor:default}
+
+/* 燃える演出 */
+.paper.burning #secret{animation:burnfade 1.6s ease forwards}
+@keyframes burnfade{
+  0%{filter:none;opacity:1}
+  40%{filter:blur(1px) sepia(.6) saturate(2);opacity:.85}
+  100%{filter:blur(6px) sepia(1) saturate(3) brightness(1.4);opacity:0}
+}
+.spark{position:absolute;font-size:22px;pointer-events:none;animation:rise 1.4s ease-out forwards}
+@keyframes rise{
+  0%{opacity:0;transform:translateY(10px) scale(.6)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translateY(-90px) scale(1.25) rotate(14deg)}
+}
+.done-msg{
+  display:none;text-align:center;padding:26px 10px;
+}
+.done-msg.show{display:block;animation:pop .5s ease}
+@keyframes pop{0%{opacity:0;transform:scale(.9)}100%{opacity:1;transform:scale(1)}}
+.done-msg .big{font-size:44px}
+.done-msg .t1{font-weight:900;color:var(--navy);font-size:16px;margin-top:6px}
+.done-msg .t2{font-size:13px;color:var(--sub);margin-top:4px}
+
+/* しくみ */
+.how{border-radius:14px;padding:12px 14px;font-size:13px;margin-top:10px;background:var(--main-l)}
+.how .bt{font-weight:900;color:var(--main);display:flex;align-items:center;gap:5px;margin-bottom:4px;font-size:13px}
+.how + .how{background:#fdf6ea}
+.how + .how .bt{color:#b5822a}
+.how + .how + .how{background:#f7f0fa}
+.how + .how + .how .bt{color:#8a5aa8}
+footer{text-align:center;font-size:11px;color:var(--sub);padding:10px 14px 0}
+footer a{color:var(--main);font-weight:700}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🤫 ひみつノート</h1>
+  <span class="role-badge">保存されません</span>
+</header>
+
+<main>
+
+  <div class="promise">
+    <div class="pt">ここに書いたことは、誰にも届きません</div>
+    <ul>
+      <li>保存されない — この画面を閉じた瞬間、消えます</li>
+      <li>送信されない — 通信は一切しません(機内モードでも動きます)</li>
+      <li>学習されない — AIではなく、ただの紙のようなツールです</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>📝 なんでも書いていい場所</h2>
+    <p class="sub" style="margin-bottom:10px">言えないこと、モヤモヤ、ぜんぶ吐き出してOK。書き終わったら燃やしてスッキリ。</p>
+
+    <div class="paper" id="paper">
+      <textarea id="secret" placeholder="ここに書いたことは、誰にも見られません。&#10;だれかへの愚痴も、不安も、弱音も、そのまま書いて大丈夫。"
+        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    </div>
+    <div class="counter"><span id="count">0</span> 文字</div>
+
+    <div class="btn-row">
+      <button class="btn btn-burn" id="burnBtn" disabled>🔥 燃やして消す</button>
+    </div>
+
+    <div class="done-msg" id="doneMsg">
+      <div class="big">🕊️</div>
+      <div class="t1">ぜんぶ燃やしました</div>
+      <div class="t2">もうどこにも残っていません。おつかれさま、深呼吸しよう。</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 「本当に残らないの?」の答え</h2>
+    <div class="how">
+      <div class="bt">📡 通信ゼロ</div>
+      このページは開いたあと、インターネットに一切アクセスしません。試しに機内モードにしても、最後まで全部使えます。
+    </div>
+    <div class="how">
+      <div class="bt">💾 保存ゼロ</div>
+      端末への保存(localStorageやCookie)も一切使っていません。文字はメモリの上にあるだけで、燃やすか画面を閉じれば消えます。
+    </div>
+    <div class="how">
+      <div class="bt">🧠 学習ゼロ</div>
+      AIチャットに書いたことはサーバーに送られますが、これはただのツール。読む相手そのものが存在しないので、学習のしようがありません。
+    </div>
+  </div>
+
+  <footer>
+    <a href="index.html">← たいじログにもどる</a>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+  var ta = document.getElementById('secret');
+  var btn = document.getElementById('burnBtn');
+  var count = document.getElementById('count');
+  var paper = document.getElementById('paper');
+  var done = document.getElementById('doneMsg');
+
+  ta.addEventListener('input', function(){
+    count.textContent = ta.value.length;
+    btn.disabled = ta.value.length === 0;
+    done.classList.remove('show');
+  });
+
+  // うっかりリロード・タブ閉じで消える前にひとこと(書いてる途中だけ)
+  window.addEventListener('beforeunload', function(e){
+    if(ta.value.length > 0){ e.preventDefault(); e.returnValue = ''; }
+  });
+
+  btn.addEventListener('click', function(){
+    if(!ta.value) return;
+    btn.disabled = true;
+    paper.classList.add('burning');
+
+    // 火の粉の演出
+    var emojis = ['🔥','✨','🔥','💨','✨'];
+    for(var i = 0; i < 10; i++){
+      (function(i){
+        setTimeout(function(){
+          var s = document.createElement('span');
+          s.className = 'spark';
+          s.textContent = emojis[i % emojis.length];
+          s.style.left = (8 + Math.random() * 84) + '%';
+          s.style.top = (30 + Math.random() * 50) + '%';
+          paper.appendChild(s);
+          setTimeout(function(){ s.remove(); }, 1500);
+        }, i * 110);
+      })(i);
+    }
+
+    setTimeout(function(){
+      ta.value = '';
+      count.textContent = '0';
+      paper.classList.remove('burning');
+      done.classList.add('show');
+    }, 1600);
+  });
+})();
+</script>
+</body>
+</html>
