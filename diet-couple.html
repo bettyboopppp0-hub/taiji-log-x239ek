@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>すりむログ ふたり｜夫婦で体重・ごはん共有</title>
+<meta name="description" content="夫婦・カップルで体重とごはんの記録を共有できるダイエットアプリ。共有コードをLINEで送るだけ。データは端末内だけに保存。">
+<meta name="theme-color" content="#5aa87a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --main:#5aa87a; --main-l:#e9f5ee; --navy:#3d5548;
+  --accent:#e8935a; --accent-l:#fdf1e8;
+  --gold:#e8b93c; --bg:#f6faf7; --card:#ffffff;
+  --text:#3e4a42; --sub:#8b988f; --line:#e2ede6;
+  --radius:18px; --shadow:0 2px 10px rgba(61,85,72,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Zen Maru Gothic',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+header{background:linear-gradient(135deg,#4a9068,#7cc298);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between}
+header h1{font-size:17px;font-weight:900;letter-spacing:.05em}
+.streak-badge{background:rgba(255,255,255,.25);border-radius:999px;padding:3px 12px;font-size:12px;font-weight:700}
+main{max-width:520px;margin:0 auto;padding:16px 14px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h2{font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sub{color:var(--sub);font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;font-family:inherit;font-weight:700;font-size:14px;padding:11px 18px;cursor:pointer;transition:transform .1s}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--main);color:#fff}
+.btn-ghost{background:var(--main-l);color:var(--main)}
+.btn-line{background:#06c755;color:#fff}
+.btn-sm{padding:7px 13px;font-size:12px}
+.btn-danger{background:#fdeaea;color:#c0564f}
+.btn-wide{width:100%;font-size:15px;padding:13px}
+input[type=number],input[type=date],input[type=text],select,textarea{font-family:inherit;font-size:15px;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--main)}
+label.fl{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:10px 0 4px}
+/* nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:60;padding-bottom:env(safe-area-inset-bottom);max-width:100%}
+nav button{flex:1;background:none;border:none;font-family:inherit;padding:9px 0 7px;font-size:10px;color:var(--sub);font-weight:700;cursor:pointer}
+nav button .ico{display:block;font-size:20px;margin-bottom:1px}
+nav button.on{color:var(--main)}
+/* hero */
+.hero{background:linear-gradient(135deg,#4a9068,#7cc298);color:#fff;border-radius:var(--radius);padding:18px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero::after{content:'🥗';position:absolute;right:2px;bottom:-12px;font-size:74px;opacity:.15}
+.duo{display:flex;gap:10px}
+.duo .person{flex:1;background:rgba(255,255,255,.14);border-radius:14px;padding:12px 8px;text-align:center}
+.duo .person.me{background:rgba(255,255,255,.28)}
+.duo .who{font-size:12px;font-weight:900;opacity:.95}
+.duo .wt b{font-size:28px;font-weight:900;margin-right:2px}
+.duo .wt{font-size:13px;margin-top:2px}
+.duo .mini{display:inline-block;background:rgba(0,0,0,.14);border-radius:999px;font-size:10.5px;font-weight:900;padding:1px 10px;margin-top:6px}
+.goal-bar{background:rgba(255,255,255,.25);border-radius:999px;height:10px;overflow:hidden;margin-top:12px}
+.goal-bar>div{background:var(--gold);height:100%;border-radius:999px;transition:width .5s}
+.goal-lbl{display:flex;justify-content:space-between;font-size:11px;margin-top:4px;opacity:.9}
+/* quick record */
+.wt-input-row{display:flex;gap:8px;align-items:center}
+.wt-input-row input{flex:1;font-size:22px;font-weight:900;text-align:center;padding:12px}
+.wt-input-row .unit{font-weight:900;color:var(--sub)}
+.step-btns{display:flex;gap:8px;margin-top:8px}
+.step-btns button{flex:1;background:var(--main-l);border:none;border-radius:12px;font-family:inherit;font-weight:900;font-size:14px;color:var(--main);padding:9px 0;cursor:pointer}
+.step-btns button:active{transform:scale(.95)}
+/* chart */
+.chart-wrap{overflow-x:auto}
+svg.chart{width:100%;height:190px;display:block}
+.range-tabs{display:flex;gap:6px;margin-bottom:10px}
+.range-tabs button{border:none;background:var(--main-l);color:var(--main);border-radius:999px;font-family:inherit;font-weight:700;font-size:12px;padding:5px 14px;cursor:pointer}
+.range-tabs button.on{background:var(--main);color:#fff}
+.legend{display:flex;gap:14px;font-size:11.5px;font-weight:700;color:var(--sub);margin-top:6px}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:3px;vertical-align:3px;margin-right:4px}
+/* stats */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--main-l);border-radius:12px;padding:10px 6px;text-align:center}
+.stat .v{font-size:17px;font-weight:900;color:var(--navy)}
+.stat .k{font-size:10.5px;color:var(--sub);font-weight:700}
+/* meals */
+.meal-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.meal-tabs button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
+.meal-tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.meal-item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--line)}
+.meal-item:last-child{border-bottom:none}
+.meal-item .emoji{font-size:24px;width:32px;text-align:center;flex-shrink:0}
+.meal-item .body{flex:1;min-width:0}
+.meal-item .name{font-weight:700;font-size:14px}
+.meal-item .tip{font-size:11.5px;color:var(--sub)}
+.meal-item .kcal{background:var(--accent);color:#fff;border-radius:999px;font-size:11px;font-weight:900;padding:2px 9px;white-space:nowrap}
+.meal-item .del{background:none;border:none;color:var(--sub);font-size:16px;cursor:pointer;padding:4px}
+.kcal-total{background:var(--accent-l);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:900;color:#b06a35;margin-top:10px}
+.kcal-total b{font-size:20px}
+/* history */
+.h-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px dashed var(--line);font-size:13.5px}
+.h-row:last-child{border-bottom:none}
+.h-row .d{width:86px;color:var(--sub);font-size:12px;font-weight:700;flex-shrink:0}
+.h-row .w{font-weight:900;color:var(--navy)}
+.h-row .dv{font-size:11.5px;font-weight:900;border-radius:999px;padding:1px 8px}
+.dv.down{background:var(--main-l);color:var(--main)}
+.dv.up{background:#fdeaea;color:#c0564f}
+.dv.flat{background:#f0f0f0;color:var(--sub)}
+.h-row .del{margin-left:auto;background:none;border:none;color:var(--sub);cursor:pointer;font-size:15px;padding:4px}
+/* stamps */
+.stamp-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}
+.stamp-cal .dow{font-size:10px;color:var(--sub);font-weight:900}
+.stamp-cal .day{aspect-ratio:1;border-radius:10px;background:#f2f6f3;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--sub);gap:1px}
+.stamp-cal .day.today{outline:2px solid var(--main)}
+/* message */
+.cheer{background:linear-gradient(135deg,#e9f5ee,#f6faf7);border-radius:14px;padding:14px;font-size:13.5px;position:relative;margin-top:10px}
+.cheer::before{content:'🐨';position:absolute;top:-12px;left:12px;font-size:24px}
+/* partner block */
+.partner-tag{display:inline-block;background:var(--accent-l);color:#b06a35;border-radius:999px;font-size:11px;font-weight:900;padding:2px 10px;margin-left:6px}
+.p-empty{background:var(--accent-l);border-radius:12px;padding:12px 14px;font-size:13px;color:#b06a35}
+/* setup overlay */
+#setup{position:fixed;inset:0;background:var(--bg);z-index:100;overflow-y:auto;padding:calc(30px + env(safe-area-inset-top)) 18px 30px}
+#setup .inner{max-width:420px;margin:0 auto}
+#setup h1{font-size:22px;font-weight:900;color:var(--navy);text-align:center;margin-bottom:4px}
+#setup .lead{text-align:center;font-size:13px;color:var(--sub);margin-bottom:18px}
+.role-pick{display:flex;gap:10px;margin:8px 0 4px}
+.role-pick button{flex:1;border:2px solid var(--line);background:#fff;border-radius:16px;padding:16px 6px;font-family:inherit;font-weight:900;font-size:15px;color:var(--text);cursor:pointer}
+.role-pick button .big{display:block;font-size:34px;margin-bottom:4px}
+.role-pick button.on{border-color:var(--main);background:var(--main-l);color:var(--main)}
+/* toast */
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;border-radius:999px;padding:10px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:110;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.note{background:var(--main-l);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--navy);margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- ===== 初回セットアップ ===== -->
+<div id="setup" class="hidden">
+  <div class="inner">
+    <h1>🥗 すりむログ ふたり</h1>
+    <p class="lead">夫婦で体重とごはんを共有できる<br>ふたり用すりむログだよ</p>
+    <div class="card">
+      <h2>あなたはどっち？</h2>
+      <div class="role-pick" id="rolePick">
+        <button data-role="wife"><span class="big">👩</span>妻</button>
+        <button data-role="husband"><span class="big">👨</span>旦那</button>
+      </div>
+      <label class="fl">ニックネーム（省略可）</label>
+      <input type="text" id="setupName" maxlength="10" placeholder="例：みほ / たかし">
+      <div style="margin-top:14px"><button class="btn btn-primary btn-wide" id="setupBtn">はじめる</button></div>
+      <div class="note">💡 ふたりがそれぞれ自分のスマホでこのページを開いて記録し、「きょうゆう」タブの共有コードをLINEで送り合うと、おたがいの体重・ごはんが見られるよ。データは端末内だけに保存されます。</div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>🥗 すりむログ ふたり</h1>
+  <span class="streak-badge" id="streakBadge">🔥 0日連続</span>
+</header>
+
+<main>
+
+<!-- ===== ホーム ===== -->
+<section id="view-home">
+  <div class="hero">
+    <div class="duo">
+      <div class="person me">
+        <div class="who" id="duoMeName">👩 わたし</div>
+        <div class="wt"><b id="duoMeWeight">--.-</b>kg</div>
+        <div class="mini" id="duoMeDiff">--</div>
+      </div>
+      <div class="person">
+        <div class="who" id="duoPtName">👨 パートナー</div>
+        <div class="wt"><b id="duoPtWeight">--.-</b>kg</div>
+        <div class="mini" id="duoPtDiff">--</div>
+      </div>
+    </div>
+    <div class="goal-bar"><div id="goalBarFill" style="width:0%"></div></div>
+    <div class="goal-lbl"><span id="goalStart">スタート --</span><span id="goalTarget">目標 --</span></div>
+  </div>
+
+  <div class="card">
+    <h2>⚖️ きょうの体重をきろく</h2>
+    <div class="wt-input-row">
+      <input type="number" id="weightInput" step="0.1" inputmode="decimal" placeholder="00.0">
+      <span class="unit">kg</span>
+      <button class="btn btn-primary" id="saveWeightBtn">きろく</button>
+    </div>
+    <div class="step-btns">
+      <button data-step="-0.5">-0.5</button>
+      <button data-step="-0.1">-0.1</button>
+      <button data-step="0.1">+0.1</button>
+      <button data-step="0.5">+0.5</button>
+    </div>
+    <div class="cheer" id="cheerMsg">まいにち同じ時間にはかるのがコツだよ。おふろの前がおすすめ！</div>
+  </div>
+
+  <div class="card">
+    <h2>📊 このごろのわたし</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="v" id="statWeek">--</div><div class="k">7日間の変化</div></div>
+      <div class="stat"><div class="v" id="statBmi">--</div><div class="k">BMI</div></div>
+      <div class="stat"><div class="v" id="statRemain">--</div><div class="k">目標まで</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="partnerCard">
+    <h2>💑 パートナーのようす</h2>
+    <div id="partnerBody"></div>
+  </div>
+
+  <div class="card">
+    <h2>📅 今月のスタンプ</h2>
+    <div class="stamp-cal" id="stampCal"></div>
+    <p class="sub" style="margin-top:8px">🌱=わたし 🍊=パートナー が記録した日</p>
+  </div>
+</section>
+
+<!-- ===== グラフ ===== -->
+<section id="view-graph" class="hidden">
+  <div class="card">
+    <h2>📈 ふたりの体重グラフ</h2>
+    <div class="range-tabs" id="rangeTabs">
+      <button data-r="14" class="on">2週間</button>
+      <button data-r="30">1か月</button>
+      <button data-r="90">3か月</button>
+      <button data-r="0">ぜんぶ</button>
+    </div>
+    <div class="chart-wrap"><svg class="chart" id="chartSvg" viewBox="0 0 340 190" preserveAspectRatio="none"></svg></div>
+    <div class="legend">
+      <span><i style="background:#5aa87a"></i><span id="legendMe">わたし</span></span>
+      <span><i style="background:#e8935a"></i><span id="legendPt">パートナー</span></span>
+      <span><i style="background:#e8b93c;height:2px"></i>目標</span>
+    </div>
+  </div>
+  <div class="card">
+    <h2>📝 わたしのきろく一覧</h2>
+    <div id="historyList"><p class="sub">まだ記録がありません</p></div>
+  </div>
+</section>
+
+<!-- ===== ごはん ===== -->
+<section id="view-meal" class="hidden">
+  <div class="card">
+    <h2>🍚 きょうのごはん</h2>
+    <div class="meal-tabs" id="mealTypeTabs">
+      <button data-t="朝" class="on">🌅 朝</button>
+      <button data-t="昼">☀️ 昼</button>
+      <button data-t="夜">🌙 夜</button>
+      <button data-t="間食">🍩 間食</button>
+    </div>
+    <label class="fl">たべたもの</label>
+    <input type="text" id="mealName" placeholder="例：サラダチキンとおにぎり">
+    <label class="fl">カロリー（だいたいでOK・省略可）</label>
+    <input type="number" id="mealKcal" inputmode="numeric" placeholder="例：350">
+    <div style="margin-top:12px"><button class="btn btn-primary btn-wide" id="saveMealBtn">ついか</button></div>
+  </div>
+  <div class="card">
+    <h2>🧾 きょうたべたもの</h2>
+    <div id="mealList"><p class="sub">まだ記録がありません</p></div>
+    <div class="kcal-total"><span>きょうの合計</span><span><b id="kcalToday">0</b> kcal <span class="sub" id="kcalGoalLbl"></span></span></div>
+  </div>
+  <div class="card">
+    <h2>🍽️ パートナーがたべたもの<span class="partner-tag" id="ptMealDate">きょう</span></h2>
+    <div id="ptMealList"><p class="sub">まだ共有されていません</p></div>
+  </div>
+</section>
+
+<!-- ===== きょうゆう ===== -->
+<section id="view-share" class="hidden">
+  <div class="card">
+    <h2>🤝 ふたりで共有する</h2>
+    <p class="sub" style="margin-bottom:10px">①自分のコードをLINEで送る → ②相手のコードをここに貼り付けて「読み込む」。おたがいにやると両方のスマホでふたりの記録が見られるよ。<br>💡うまく送れないときは「コピー」→LINEに自分で貼り付けが確実。読み込むときはメッセージ全文をまるごとコピーでOK（前後に文章が混ざっても大丈夫）</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-line" style="flex:1" id="lineShareBtn">💬 LINEで送る</button>
+      <button class="btn btn-ghost" style="flex:1" id="copyShareBtn">📋 コピー</button>
+    </div>
+    <textarea id="shareIn" rows="3" placeholder="届いた共有コード(SL2:…)をここに貼り付け" style="margin-top:12px"></textarea>
+    <div style="margin-top:10px"><button class="btn btn-primary btn-wide" id="importBtn">📥 読み込む</button></div>
+    <div class="note">🔒 共有コードにはあなたの記録（体重・ごはん・目標）が入っています。パートナー以外には送らないでね。データはサーバーに送信されません。</div>
+  </div>
+  <div class="card">
+    <h2>📡 共有のじょうたい</h2>
+    <div id="shareStatus"><p class="sub">まだパートナーの記録を読み込んでいません</p></div>
+  </div>
+</section>
+
+<!-- ===== せってい ===== -->
+<section id="view-set" class="hidden">
+  <div class="card">
+    <h2>👤 わたしのプロフィール</h2>
+    <label class="fl">あなたは</label>
+    <div class="role-pick" id="setRolePick" style="margin-top:2px">
+      <button data-role="wife"><span class="big">👩</span>妻</button>
+      <button data-role="husband"><span class="big">👨</span>旦那</button>
+    </div>
+    <label class="fl">ニックネーム（省略可）</label>
+    <input type="text" id="setName" maxlength="10" placeholder="例：みほ / たかし">
+  </div>
+  <div class="card">
+    <h2>🎯 もくひょう設定</h2>
+    <label class="fl">身長（cm）</label>
+    <input type="number" id="setHeight" step="0.1" inputmode="decimal" placeholder="例：158">
+    <label class="fl">スタート体重（kg）</label>
+    <input type="number" id="setStart" step="0.1" inputmode="decimal" placeholder="例：58.0">
+    <label class="fl">目標体重（kg）</label>
+    <input type="number" id="setTarget" step="0.1" inputmode="decimal" placeholder="例：52.0">
+    <label class="fl">目標日（省略可）</label>
+    <input type="date" id="setDate">
+    <label class="fl">1日のカロリーめやす（kcal・省略可）</label>
+    <input type="number" id="setKcal" inputmode="numeric" placeholder="例：1600">
+    <div style="margin-top:14px"><button class="btn btn-primary btn-wide" id="saveSetBtn">ほぞん</button></div>
+    <div class="note">💡 データはこの端末の中だけに保存されます。サーバーには送信されません。</div>
+  </div>
+  <div class="card">
+    <h2>🗑️ データ管理</h2>
+    <button class="btn btn-danger btn-wide" id="clearPartnerBtn" style="margin-bottom:8px">パートナーの共有データだけ削除</button>
+    <button class="btn btn-danger btn-wide" id="clearBtn">すべての記録を削除する</button>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button data-v="home" class="on"><span class="ico">🏠</span>ホーム</button>
+  <button data-v="graph"><span class="ico">📈</span>グラフ</button>
+  <button data-v="meal"><span class="ico">🍚</span>ごはん</button>
+  <button data-v="share"><span class="ico">🤝</span>きょうゆう</button>
+  <button data-v="set"><span class="ico">🎯</span>せってい</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+const KEY='surimu-log-couple-v1';
+const $=id=>document.getElementById(id);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const ROLE_EMOJI={wife:'👩',husband:'👨'};
+const ROLE_LABEL={wife:'妻',husband:'旦那'};
+
+let db=load();
+function load(){
+  try{
+    const d=JSON.parse(localStorage.getItem(KEY));
+    if(d&&typeof d==='object'){
+      return Object.assign({role:null,name:'',weights:{},meals:{},profile:{},partner:null},d);
+    }
+  }catch(e){}
+  return {role:null,name:'',weights:{},meals:{},profile:{},partner:null};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));}
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2000);}
+
+const CHEERS=[
+  'きょうも記録できたね、えらい！🌱',
+  '小さな一歩のつみかさねが、いちばん強い💪',
+  '数字は毎日上下するもの。1週間の流れで見よう👀',
+  'よくがんばってる！水分もわすれずにね🚰',
+  'ゆっくりでだいじょうぶ。続けることがすべて✨',
+  'きのうの自分より、ちょっとだけ前へ🐾',
+  'ふたりでやると続くよ。共有コードも送ってあげてね🤝',
+];
+
+function myName(){return db.name||(ROLE_LABEL[db.role]||'わたし');}
+function ptRole(){return db.role==='wife'?'husband':'wife';}
+function ptName(){
+  if(db.partner&&db.partner.name)return db.partner.name;
+  return ROLE_LABEL[ptRole()]||'パートナー';
+}
+
+/* ===== 初回セットアップ ===== */
+let setupRole=null;
+$('rolePick').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  setupRole=b.dataset.role;
+  document.querySelectorAll('#rolePick button').forEach(x=>x.classList.toggle('on',x===b));
+});
+$('setupBtn').addEventListener('click',()=>{
+  if(!setupRole){toast('妻か旦那かをえらんでね');return;}
+  db.role=setupRole;
+  db.name=$('setupName').value.trim();
+  save();
+  $('setup').classList.add('hidden');
+  renderAll();
+  toast('はじめよう！🌱');
+});
+
+/* ===== nav ===== */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+    ['home','graph','meal','share','set'].forEach(v=>$('view-'+v).classList.toggle('hidden',v!==b.dataset.v));
+    if(b.dataset.v==='graph'){renderChart();renderHistory();}
+    if(b.dataset.v==='meal')renderMeals();
+    if(b.dataset.v==='share')renderShareStatus();
+    if(b.dataset.v==='set')fillSettings();
+  });
+});
+
+/* ===== weight ===== */
+$('saveWeightBtn').addEventListener('click',()=>{
+  const v=parseFloat($('weightInput').value);
+  if(!v||v<20||v>300){toast('20〜300kgの間で入力してね');return;}
+  db.weights[todayStr()]=Math.round(v*10)/10;
+  save();renderHome();
+  toast('きろくしました！🌱');
+  $('cheerMsg').textContent=CHEERS[Math.floor(Math.random()*CHEERS.length)];
+});
+document.querySelectorAll('.step-btns button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const cur=parseFloat($('weightInput').value)||lastWeight(db.weights)||50;
+    $('weightInput').value=(Math.round((cur+parseFloat(b.dataset.step))*10)/10).toFixed(1);
+  });
+});
+
+function sortedDates(weights){return Object.keys(weights).sort();}
+function lastWeight(weights){const ds=sortedDates(weights);return ds.length?weights[ds[ds.length-1]]:null;}
+function weekDiff(weights){
+  const ds=sortedDates(weights);
+  if(ds.length<2)return null;
+  const last=weights[ds[ds.length-1]];
+  const lim=new Date();lim.setDate(lim.getDate()-7);
+  const limStr=lim.getFullYear()+'-'+String(lim.getMonth()+1).padStart(2,'0')+'-'+String(lim.getDate()).padStart(2,'0');
+  let base=null;
+  for(const d of ds){if(d>=limStr){base=weights[d];break;}}
+  if(base==null)base=weights[ds[0]];
+  return last-base;
+}
+
+/* ===== streak: 体重かごはんを記録した連続日数 ===== */
+function recordedOn(ds){return db.weights[ds]!=null||(db.meals[ds]&&db.meals[ds].length>0);}
+function partnerRecordedOn(ds){
+  const p=db.partner;
+  return !!p&&(p.weights[ds]!=null||(p.meals[ds]&&p.meals[ds].length>0));
+}
+function streak(){
+  let n=0;const d=new Date();
+  if(!recordedOn(todayStr()))d.setDate(d.getDate()-1);
+  for(;;){
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    if(!recordedOn(ds))break;
+    n++;d.setDate(d.getDate()-1);
+  }
+  return n;
+}
+
+/* ===== home ===== */
+function renderHome(){
+  const w=lastWeight(db.weights),p=db.profile;
+  $('streakBadge').textContent='🔥 '+streak()+'日連続';
+  if($('weightInput').value===''&&db.weights[todayStr()]!=null)$('weightInput').value=db.weights[todayStr()].toFixed(1);
+
+  // ふたりヒーロー
+  $('duoMeName').textContent=(ROLE_EMOJI[db.role]||'🙂')+' '+myName();
+  $('duoMeWeight').textContent=w!=null?w.toFixed(1):'--.-';
+  const myWk=weekDiff(db.weights);
+  $('duoMeDiff').textContent=myWk!=null?('7日 '+(myWk>0?'+':'')+myWk.toFixed(1)+'kg'):'記録しよう';
+
+  const pt=db.partner;
+  $('duoPtName').textContent=(ROLE_EMOJI[ptRole()]||'🙂')+' '+ptName();
+  if(pt){
+    const pw=lastWeight(pt.weights);
+    $('duoPtWeight').textContent=pw!=null?pw.toFixed(1):'--.-';
+    const pWk=weekDiff(pt.weights);
+    $('duoPtDiff').textContent=pWk!=null?('7日 '+(pWk>0?'+':'')+pWk.toFixed(1)+'kg'):'記録待ち';
+  }else{
+    $('duoPtWeight').textContent='--.-';
+    $('duoPtDiff').textContent='共有待ち';
+  }
+
+  // 自分の目標バー
+  if(w!=null&&p.start&&p.target){
+    const total=p.start-p.target,done=p.start-w;
+    const pct=total>0?Math.max(0,Math.min(100,done/total*100)):0;
+    $('goalBarFill').style.width=pct+'%';
+    $('goalStart').textContent=myName()+' スタート '+p.start.toFixed(1)+'kg';
+    $('goalTarget').textContent='目標 '+p.target.toFixed(1)+'kg';
+    const remain=w-p.target;
+    $('statRemain').textContent=remain<=0?'達成🎉':remain.toFixed(1)+'kg';
+  }else{
+    $('goalBarFill').style.width='0%';
+    $('goalStart').textContent='スタート --';
+    $('goalTarget').textContent='目標 --';
+    $('statRemain').textContent='--';
+  }
+
+  const wk=weekDiff(db.weights);
+  $('statWeek').textContent=wk!=null?((wk>0?'+':'')+wk.toFixed(1)+'kg'):'--';
+
+  if(w!=null&&p.height){
+    const bmi=w/Math.pow(p.height/100,2);
+    $('statBmi').textContent=bmi.toFixed(1);
+  }else $('statBmi').textContent='--';
+
+  renderPartnerCard();
+  renderStamps();
+}
+
+/* ===== partner card ===== */
+function renderPartnerCard(){
+  const el=$('partnerBody'),pt=db.partner;
+  if(!pt){
+    el.innerHTML='<div class="p-empty">まだ共有されていません。「きょうゆう」タブで共有コードを送り合うと、ここにパートナーの体重やごはんが出るよ🤝</div>';
+    return;
+  }
+  const pw=lastWeight(pt.weights);
+  const prof=pt.profile||{};
+  let goalTxt='';
+  if(pw!=null&&prof.start&&prof.target){
+    const total=prof.start-prof.target;
+    const pct=total>0?Math.max(0,Math.min(100,(prof.start-pw)/total*100)):0;
+    const remain=pw-prof.target;
+    goalTxt=remain<=0?'🎉 目標たっせい！':'目標まで あと '+remain.toFixed(1)+'kg（'+Math.round(pct)+'%）';
+  }
+  const todayMeals=(pt.meals[todayStr()]||[]);
+  const kcal=todayMeals.reduce((s,m)=>s+(m.k||0),0);
+  const upd=pt.updated?new Date(pt.updated):null;
+  const updTxt=upd?(upd.getMonth()+1)+'/'+upd.getDate()+' '+String(upd.getHours()).padStart(2,'0')+':'+String(upd.getMinutes()).padStart(2,'0'):'--';
+  el.innerHTML=
+    '<div class="stat-grid">'+
+      '<div class="stat"><div class="v">'+(pw!=null?pw.toFixed(1)+'kg':'--')+'</div><div class="k">さいしんの体重</div></div>'+
+      '<div class="stat"><div class="v">'+todayMeals.length+'件</div><div class="k">きょうのごはん</div></div>'+
+      '<div class="stat"><div class="v">'+(kcal||'--')+'</div><div class="k">きょうのkcal</div></div>'+
+    '</div>'+
+    (goalTxt?'<p class="sub" style="margin-top:8px">'+goalTxt+'</p>':'')+
+    '<p class="sub" style="margin-top:4px">最終共有：'+updTxt+'</p>';
+}
+
+/* ===== stamps ===== */
+function renderStamps(){
+  const el=$('stampCal');el.innerHTML='';
+  ['日','月','火','水','木','金','土'].forEach(d=>{const s=document.createElement('div');s.className='dow';s.textContent=d;el.appendChild(s);});
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++)el.appendChild(document.createElement('div'));
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const c=document.createElement('div');c.className='day';
+    const me=recordedOn(ds),pt=partnerRecordedOn(ds);
+    if(me||pt)c.textContent=(me?'🌱':'')+(pt?'🍊':'');
+    else c.textContent=d;
+    if(ds===todayStr())c.classList.add('today');
+    el.appendChild(c);
+  }
+}
+
+/* ===== chart（ふたり分） ===== */
+let chartRange=14;
+$('rangeTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  chartRange=parseInt(b.dataset.r,10);
+  document.querySelectorAll('#rangeTabs button').forEach(x=>x.classList.toggle('on',x===b));
+  renderChart();
+});
+function filterRange(ds){
+  if(chartRange<=0)return ds;
+  const lim=new Date();lim.setDate(lim.getDate()-chartRange);
+  const limStr=lim.getFullYear()+'-'+String(lim.getMonth()+1).padStart(2,'0')+'-'+String(lim.getDate()).padStart(2,'0');
+  return ds.filter(d=>d>=limStr);
+}
+function renderChart(){
+  const svg=$('chartSvg');svg.innerHTML='';
+  $('legendMe').textContent=myName();
+  $('legendPt').textContent=ptName();
+  const myDs=filterRange(sortedDates(db.weights));
+  const ptWeights=db.partner?db.partner.weights:{};
+  const ptDs=filterRange(sortedDates(ptWeights));
+  if(myDs.length===0&&ptDs.length===0){
+    svg.innerHTML='<text x="170" y="95" text-anchor="middle" font-size="13" fill="#8b988f" font-family="inherit">まだ記録がありません</text>';
+    return;
+  }
+  const W=340,H=190,PL=34,PR=8,PT=12,PB=20;
+  // 全日付の共通X軸
+  const allDs=Array.from(new Set(myDs.concat(ptDs))).sort();
+  const vals=myDs.map(d=>db.weights[d]).concat(ptDs.map(d=>ptWeights[d]));
+  const tgt=db.profile.target;
+  let min=Math.min(...vals),max=Math.max(...vals);
+  if(tgt){min=Math.min(min,tgt);max=Math.max(max,tgt);}
+  if(max-min<1){min-=0.5;max+=0.5;}
+  const pad=(max-min)*0.1;min-=pad;max+=pad;
+  const X=d=>{
+    if(allDs.length===1)return PL+(W-PL-PR)/2;
+    return PL+(W-PL-PR)*allDs.indexOf(d)/(allDs.length-1);
+  };
+  const Y=v=>PT+(H-PT-PB)*(1-(v-min)/(max-min));
+  let s='';
+  for(let i=0;i<=2;i++){
+    const v=min+(max-min)*i/2,y=Y(v);
+    s+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#e2ede6" stroke-width="1"/>`;
+    s+=`<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="#8b988f">${v.toFixed(1)}</text>`;
+  }
+  if(tgt&&tgt>=min&&tgt<=max)
+    s+=`<line x1="${PL}" y1="${Y(tgt)}" x2="${W-PR}" y2="${Y(tgt)}" stroke="#e8b93c" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  const drawLine=(ds,weights,color)=>{
+    if(ds.length===0)return;
+    const pts=ds.map(d=>X(d)+','+Y(weights[d])).join(' ');
+    if(ds.length>1)s+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    ds.forEach(d=>{s+=`<circle cx="${X(d)}" cy="${Y(weights[d])}" r="3.2" fill="#fff" stroke="${color}" stroke-width="2"/>`;});
+  };
+  drawLine(ptDs,ptWeights,'#e8935a');
+  drawLine(myDs,db.weights,'#5aa87a');
+  const fmt=d=>parseInt(d.slice(5,7),10)+'/'+parseInt(d.slice(8),10);
+  s+=`<text x="${PL}" y="${H-4}" font-size="9.5" fill="#8b988f">${fmt(allDs[0])}</text>`;
+  if(allDs.length>1)s+=`<text x="${W-PR}" y="${H-4}" text-anchor="end" font-size="9.5" fill="#8b988f">${fmt(allDs[allDs.length-1])}</text>`;
+  svg.innerHTML=s;
+}
+
+/* ===== history ===== */
+function renderHistory(){
+  const el=$('historyList');
+  const ds=sortedDates(db.weights).slice().reverse();
+  if(ds.length===0){el.innerHTML='<p class="sub">まだ記録がありません</p>';return;}
+  el.innerHTML='';
+  ds.slice(0,60).forEach((d,i)=>{
+    const w=db.weights[d];
+    const prev=i<ds.length-1?db.weights[ds[i+1]]:null;
+    let dv='';
+    if(prev!=null){
+      const diff=Math.round((w-prev)*10)/10;
+      const cls=diff<0?'down':diff>0?'up':'flat';
+      dv=`<span class="dv ${cls}">${diff>0?'+':''}${diff.toFixed(1)}</span>`;
+    }
+    const row=document.createElement('div');row.className='h-row';
+    row.innerHTML=`<span class="d">${d.slice(5).replace('-','/')}</span><span class="w">${w.toFixed(1)}kg</span>${dv}<button class="del" data-d="${d}">✕</button>`;
+    el.appendChild(row);
+  });
+  el.querySelectorAll('.del').forEach(b=>b.addEventListener('click',()=>{
+    if(!confirm(b.dataset.d+' の記録を削除しますか？'))return;
+    delete db.weights[b.dataset.d];save();renderHistory();renderChart();renderHome();
+  }));
+}
+
+/* ===== meals ===== */
+let mealType='朝';
+const MEAL_EMOJI={'朝':'🌅','昼':'☀️','夜':'🌙','間食':'🍩'};
+$('mealTypeTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  mealType=b.dataset.t;
+  document.querySelectorAll('#mealTypeTabs button').forEach(x=>x.classList.toggle('on',x===b));
+});
+$('saveMealBtn').addEventListener('click',()=>{
+  const name=$('mealName').value.trim();
+  if(!name){toast('たべたものを入力してね');return;}
+  const kcal=parseInt($('mealKcal').value,10);
+  const d=todayStr();
+  if(!db.meals[d])db.meals[d]=[];
+  db.meals[d].push({t:mealType,n:name,k:isNaN(kcal)?null:kcal});
+  save();
+  $('mealName').value='';$('mealKcal').value='';
+  renderMeals();renderHome();
+  toast('ついかしました！🍚');
+});
+function mealRow(m,delIdx){
+  const row=document.createElement('div');row.className='meal-item';
+  row.innerHTML=`<span class="emoji">${MEAL_EMOJI[m.t]||'🍽️'}</span><div class="body"><div class="name"></div><div class="tip">${m.t}ごはん</div></div>${m.k!=null?`<span class="kcal">${m.k}kcal</span>`:''}${delIdx!=null?`<button class="del" data-i="${delIdx}">✕</button>`:''}`;
+  row.querySelector('.name').textContent=m.n;
+  return row;
+}
+function renderMeals(){
+  const el=$('mealList');
+  const list=db.meals[todayStr()]||[];
+  if(list.length===0){el.innerHTML='<p class="sub">まだ記録がありません</p>';}
+  else{
+    el.innerHTML='';
+    list.forEach((m,i)=>el.appendChild(mealRow(m,i)));
+    el.querySelectorAll('.del').forEach(b=>b.addEventListener('click',()=>{
+      db.meals[todayStr()].splice(parseInt(b.dataset.i,10),1);
+      save();renderMeals();renderHome();
+    }));
+  }
+  const total=list.reduce((s,m)=>s+(m.k||0),0);
+  $('kcalToday').textContent=total;
+  const goal=db.profile.kcal;
+  $('kcalGoalLbl').textContent=goal?` / めやす ${goal}kcal`:'';
+
+  // パートナーのきょうのごはん（読み取り専用）
+  const pel=$('ptMealList');
+  const pt=db.partner;
+  const plist=pt?(pt.meals[todayStr()]||[]):[];
+  if(!pt){pel.innerHTML='<p class="sub">まだ共有されていません。「きょうゆう」タブでコードを読み込んでね</p>';}
+  else if(plist.length===0){pel.innerHTML='<p class="sub">'+ptName()+'のきょうの記録はまだ届いていないよ</p>';}
+  else{
+    pel.innerHTML='';
+    plist.forEach(m=>pel.appendChild(mealRow(m,null)));
+    const pk=plist.reduce((s,m)=>s+(m.k||0),0);
+    if(pk>0){
+      const t=document.createElement('div');t.className='kcal-total';
+      t.innerHTML='<span>'+ptName()+'の合計</span><span><b>'+pk+'</b> kcal</span>';
+      pel.appendChild(t);
+    }
+  }
+}
+
+/* ===== 共有コード ===== */
+function makeShareCode(){
+  // 空の日は入れない（コードを短くしてLINEで切れにくくする）
+  const meals={};
+  Object.keys(db.meals).forEach(k=>{if(db.meals[k]&&db.meals[k].length)meals[k]=db.meals[k];});
+  const payload={
+    app:'surimu-couple',
+    role:db.role,
+    name:db.name||'',
+    weights:db.weights,
+    meals:meals,
+    profile:db.profile,
+    ts:Date.now(),
+  };
+  return 'SL2:'+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+$('lineShareBtn').addEventListener('click',()=>{
+  const code=makeShareCode();
+  if(code.length>1500)toast('コードが長め。「コピー」→LINEに直接貼り付けが確実だよ');
+  // コードを先頭に置く（LINEで長文が後ろから切れてもコードが残るように）
+  const text=code+'\n\n🥗↑すりむログふたりの共有コードだよ。このメッセージを長押し→コピーして、あなたの「きょうゆう」タブに貼り付けて「読み込む」を押してね';
+  window.open('https://line.me/R/share?text='+encodeURIComponent(text),'_blank');
+});
+$('copyShareBtn').addEventListener('click',()=>{
+  const code=makeShareCode();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(()=>toast('共有コードをコピーしたよ！')).catch(()=>fallbackCopy(code));
+  }else fallbackCopy(code);
+});
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('共有コードをコピーしたよ！');}catch(e){toast('コピーできなかった…LINEで送ってね');}
+  ta.remove();
+}
+$('importBtn').addEventListener('click',()=>{
+  // 全角文字を半角に直し、改行・空白を掃除してからコードを探す
+  let raw=$('shareIn').value;
+  try{raw=raw.normalize('NFKC');}catch(e){}
+  raw=raw.replace(/[\s　]+/g,'');
+  let b64=null;
+  const m1=raw.match(/SL2:([A-Za-z0-9+/=]+)/);
+  if(m1){b64=m1[1];}
+  else{
+    // 「SL2:」が抜けてコード部分だけ貼られた場合も救済
+    const m2=raw.match(/[A-Za-z0-9+/=]{40,}/);
+    if(m2)b64=m2[0];
+  }
+  if(!b64){toast('コードが見つからないよ。メッセージ全文をまるごとコピーして貼り付けてみてね');return;}
+  let o;
+  try{o=JSON.parse(decodeURIComponent(escape(atob(b64))));}
+  catch(e){toast('コードが途中で切れてるみたい。全文をコピーし直してみてね');return;}
+  if(!o||o.app!=='surimu-couple'||!o.weights){toast('コードの中身が違うみたい（すりむログふたり用のコード？）');return;}
+  if(o.role===db.role){
+    if(!confirm('これはあなたと同じ「'+ROLE_LABEL[db.role]+'」のコードみたい。自分のコードを貼っていないかな？それでもパートナーの記録として読み込む？'))return;
+  }
+  // パートナー枠に合体（同じ日はあたらしいコードの内容で上書き）
+  if(!db.partner)db.partner={role:o.role,name:'',weights:{},meals:{},profile:{}};
+  db.partner.role=o.role;
+  db.partner.name=o.name||'';
+  Object.keys(o.weights||{}).forEach(k=>{db.partner.weights[k]=o.weights[k];});
+  Object.keys(o.meals||{}).forEach(k=>{db.partner.meals[k]=o.meals[k];});
+  db.partner.profile=o.profile||{};
+  db.partner.updated=Date.now();
+  save();
+  $('shareIn').value='';
+  renderAll();
+  toast(ptName()+'の記録を読み込んだよ！🤝');
+});
+function renderShareStatus(){
+  const el=$('shareStatus'),pt=db.partner;
+  if(!pt){el.innerHTML='<p class="sub">まだパートナーの記録を読み込んでいません。上の手順でコードを送り合ってね</p>';return;}
+  const upd=pt.updated?new Date(pt.updated):null;
+  const updTxt=upd?(upd.getFullYear()+'/'+(upd.getMonth()+1)+'/'+upd.getDate()+' '+String(upd.getHours()).padStart(2,'0')+':'+String(upd.getMinutes()).padStart(2,'0')):'--';
+  const wCnt=Object.keys(pt.weights).length;
+  const mCnt=Object.keys(pt.meals).reduce((s,k)=>s+pt.meals[k].length,0);
+  el.innerHTML=
+    '<div class="stat-grid">'+
+      '<div class="stat"><div class="v">'+(ROLE_EMOJI[pt.role]||'🙂')+'</div><div class="k">'+ptName()+'</div></div>'+
+      '<div class="stat"><div class="v">'+wCnt+'日</div><div class="k">体重の記録</div></div>'+
+      '<div class="stat"><div class="v">'+mCnt+'件</div><div class="k">ごはんの記録</div></div>'+
+    '</div>'+
+    '<p class="sub" style="margin-top:8px">最終読み込み：'+updTxt+'</p>'+
+    '<p class="sub">💡 新しい記録を反映するには、そのつどコードを送り合ってね</p>';
+}
+
+/* ===== settings ===== */
+let setRole=null;
+$('setRolePick').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  setRole=b.dataset.role;
+  document.querySelectorAll('#setRolePick button').forEach(x=>x.classList.toggle('on',x===b));
+});
+function fillSettings(){
+  const p=db.profile;
+  setRole=db.role;
+  document.querySelectorAll('#setRolePick button').forEach(x=>x.classList.toggle('on',x.dataset.role===db.role));
+  $('setName').value=db.name||'';
+  $('setHeight').value=p.height||'';
+  $('setStart').value=p.start||'';
+  $('setTarget').value=p.target||'';
+  $('setDate').value=p.date||'';
+  $('setKcal').value=p.kcal||'';
+}
+$('saveSetBtn').addEventListener('click',()=>{
+  const h=parseFloat($('setHeight').value),s=parseFloat($('setStart').value),t=parseFloat($('setTarget').value),k=parseInt($('setKcal').value,10);
+  db.role=setRole||db.role;
+  db.name=$('setName').value.trim();
+  db.profile={
+    height:h>0?h:null,
+    start:s>0?s:null,
+    target:t>0?t:null,
+    date:$('setDate').value||null,
+    kcal:k>0?k:null,
+  };
+  save();renderAll();
+  toast('ほぞんしました！🎯');
+});
+$('clearPartnerBtn').addEventListener('click',()=>{
+  if(!db.partner){toast('パートナーの共有データはまだないよ');return;}
+  if(!confirm(ptName()+'の共有データを削除しますか？（自分の記録は残ります）'))return;
+  db.partner=null;
+  save();renderAll();
+  toast('パートナーの共有データを削除しました');
+});
+$('clearBtn').addEventListener('click',()=>{
+  if(!confirm('本当にすべての記録を削除しますか？この操作は元に戻せません。'))return;
+  db={role:null,name:'',weights:{},meals:{},profile:{},partner:null};
+  localStorage.removeItem(KEY);
+  $('weightInput').value='';
+  fillSettings();renderHome();renderMeals();
+  $('setup').classList.remove('hidden');
+  toast('削除しました');
+});
+
+/* ===== init ===== */
+function renderAll(){renderHome();renderMeals();renderChart();renderHistory();renderShareStatus();}
+if(!db.role){$('setup').classList.remove('hidden');}
+renderAll();
+</script>
+</body>
+</html>
